@@ -486,7 +486,7 @@
         </div>
     </div>
     <script type="module">
-        import { auth, db, storage, onAuthStateChanged, doc, getDoc, setDoc, signOut, ref, uploadBytes, getDownloadURL } from './database.js';
+        import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, signOut } from './database.js';
 
         const profileAvatar = document.querySelector('#profile-avatar');
         const avatarUpload = document.querySelector('#avatar-upload');
@@ -537,11 +537,26 @@
             const file = e.target.files[0];
             if (file) {
                 loadingOverlay.classList.add('active');
-                const storageRef = ref(storage, `avatars/${currentUser.uid}/${Date.now()}_${file.name}`);
-                await uploadBytes(storageRef, file);
-                const avatarUrl = await getDownloadURL(storageRef);
-                await setDoc(doc(db, 'users', currentUser.uid), { avatar: avatarUrl }, { merge: true });
-                profileAvatar.src = avatarUrl;
+                const formData = new FormData();
+                formData.append('avatar', file);
+                formData.append('uid', currentUser.uid);
+
+                try {
+                    const response = await fetch('/upload-avatar', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        await setDoc(doc(db, 'users', currentUser.uid), { avatar: data.url }, { merge: true });
+                        profileAvatar.src = data.url;
+                    } else {
+                        alert('Ошибка загрузки аватара!');
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка загрузки аватара!');
+                }
                 loadingOverlay.classList.remove('active');
             }
         });
