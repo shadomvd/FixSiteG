@@ -485,9 +485,8 @@
             <button class="save-button" id="save-button">Сохранить</button>
         </div>
     </div>
-    <script type="module">
-        import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, signOut } from './database.js';
-
+    <script>
+        // Элементы DOM
         const profileAvatar = document.querySelector('#profile-avatar');
         const avatarUpload = document.querySelector('#avatar-upload');
         const profileUsername = document.querySelector('#profile-username');
@@ -507,60 +506,83 @@
         const navItems = document.querySelectorAll('.nav-item');
         const loadingOverlay = document.querySelector('#loading-overlay');
 
-        let currentUser = null;
+        // Уникальный ID пользователя (для простоты используем фиксированный ID)
+        const userId = 'user123';
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                await loadProfile();
-            } else {
-                window.location.href = 'auth.html';
+        // Инициализация "папки" в localStorage
+        function initStorage() {
+            if (!localStorage.getItem('avatars_folder')) {
+                localStorage.setItem('avatars_folder', JSON.stringify({}));
             }
-        });
-
-        async function loadProfile() {
-            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-            const userData = userDoc.data();
-            profileUsername.textContent = userData.username || 'Guest';
-            profileBio.textContent = userData.bio || 'О себе...';
-            profileAvatar.src = userData.avatar || 'https://img.icons8.com/ios/50/ffffff/user.png';
-            statSubscriptions.textContent = userData.subscriptions || 0;
-            statSubscribers.textContent = userData.subscribers || 0;
-            statLikes.textContent = userData.likes || 0;
+            if (!localStorage.getItem('users')) {
+                localStorage.setItem('users', JSON.stringify({}));
+            }
         }
 
+        // Загрузка профиля
+        function loadProfile() {
+            const users = JSON.parse(localStorage.getItem('users')) || {};
+            const userData = users[userId] || {
+                username: 'Guest',
+                bio: 'О себе...',
+                subscriptions: 0,
+                subscribers: 0,
+                likes: 0
+            };
+            const avatars = JSON.parse(localStorage.getItem('avatars_folder')) || {};
+            const avatar = avatars[userId] || 'https://img.icons8.com/ios/50/ffffff/user.png';
+
+            profileUsername.textContent = userData.username;
+            profileBio.textContent = userData.bio;
+            profileAvatar.src = avatar;
+            statSubscriptions.textContent = userData.subscriptions;
+            statSubscribers.textContent = userData.subscribers;
+            statLikes.textContent = userData.likes;
+        }
+
+        // Сохранение профиля
+        function saveProfile(data) {
+            const users = JSON.parse(localStorage.getItem('users')) || {};
+            users[userId] = { ...users[userId], ...data };
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        // Сохранение аватарки
+        function saveAvatar(avatarData) {
+            const avatars = JSON.parse(localStorage.getItem('avatars_folder')) || {};
+            avatars[userId] = avatarData;
+            localStorage.setItem('avatars_folder', JSON.stringify(avatars));
+        }
+
+        // Инициализация
+        initStorage();
+        loadProfile();
+
+        // Загрузка аватарки
         profileAvatar.addEventListener('click', () => {
             avatarUpload.click();
         });
 
-        avatarUpload.addEventListener('change', async (e) => {
+        avatarUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 loadingOverlay.classList.add('active');
-                const formData = new FormData();
-                formData.append('avatar', file);
-                formData.append('uid', currentUser.uid);
-
-                try {
-                    const response = await fetch('/upload-avatar', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        await setDoc(doc(db, 'users', currentUser.uid), { avatar: data.url }, { merge: true });
-                        profileAvatar.src = data.url;
-                    } else {
-                        alert('Ошибка загрузки аватара!');
-                    }
-                } catch (error) {
-                    console.error('Ошибка:', error);
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const avatarData = reader.result;
+                    saveAvatar(avatarData);
+                    profileAvatar.src = avatarData;
+                    loadingOverlay.classList.remove('active');
+                };
+                reader.onerror = () => {
                     alert('Ошибка загрузки аватара!');
-                }
-                loadingOverlay.classList.remove('active');
+                    loadingOverlay.classList.remove('active');
+                };
+                reader.readAsDataURL(file);
             }
         });
 
+        // Редактирование профиля
         editProfileButton.addEventListener('click', () => {
             modal.classList.add('active');
             editUsername.value = profileUsername.textContent;
@@ -571,15 +593,15 @@
             modal.classList.remove('active');
         });
 
-        saveButton.addEventListener('click', async () => {
+        saveButton.addEventListener('click', () => {
             const newUsername = editUsername.value.trim();
             const newBio = editBio.value.trim();
             if (newUsername) {
                 loadingOverlay.classList.add('active');
-                await setDoc(doc(db, 'users', currentUser.uid), {
+                saveProfile({
                     username: newUsername,
-                    bio: newBio
-                }, { merge: true });
+                    bio: newBio || 'О себе...'
+                });
                 profileUsername.textContent = newUsername;
                 profileBio.textContent = newBio || 'О себе...';
                 modal.classList.remove('active');
@@ -589,6 +611,7 @@
             }
         });
 
+        // Заглушки для кнопок
         settingsButton.addEventListener('click', () => {
             alert('Настройки пока не реализованы!');
         });
@@ -597,18 +620,28 @@
             alert('Избранное пока не реализовано!');
         });
 
-        logoutButton.addEventListener('click', async () => {
+        logoutButton.addEventListener('click', () => {
             loadingOverlay.classList.add('active');
-            await signOut(auth);
-            window.location.href = 'auth.html';
+            setTimeout(() => {
+                // Симуляция выхода (очистка данных пользователя)
+                localStorage.removeItem('users');
+                localStorage.removeItem('avatars_folder');
+                loadingOverlay.classList.remove('active');
+                alert('Вы вышли из аккаунта!');
+                loadProfile(); // Сброс до дефолтных значений
+            }, 1000);
         });
 
+        // Навигация
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 navItems.forEach(i => i.classList.remove('active'));
                 item.classList.add('active');
-                if (item.querySelector('.nav-text').textContent === 'Главное') {
-                    window.location.href = 'index.html';
+                const navText = item.querySelector('.nav-text').textContent;
+                if (navText === 'Главное') {
+                    alert('Переход на главную страницу (заглушка)!');
+                } else if (navText === 'Лидеры') {
+                    alert('Переход на страницу лидеров (заглушка)!');
                 }
             });
         });
