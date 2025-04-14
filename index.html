@@ -6,7 +6,6 @@
     <title>FixSite - Соцсеть</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Стили остаются без изменений */
         * {
             margin: 0;
             padding: 0;
@@ -576,7 +575,8 @@
             <img class="search-icon" src="https://img.icons8.com/ios/50/ffffff/search--v1.png" alt="search"/>
         </div>
         <div class="not-found-card" id="not-found">
-            <img src="https://img.icons8.com/ios/50/ffffff/sad.png" alt="sad  <p>Ничего не найдено</p>
+            <img src="https://img.icons8.com/ios/50/ffffff/sad.png" alt="sad"/>
+            <p>Ничего не найдено</p>
         </div>
         <div class="content" id="content"></div>
         <div class="navigation">
@@ -626,7 +626,6 @@
         const postTitle = document.querySelector('#post-title');
         const postText = document.querySelector('#post-text');
         const content = document.querySelector('#content');
-        const container = document.querySelector('.container');
         const loadingOverlay = document.querySelector('#loading-overlay');
 
         let currentUser = null;
@@ -782,7 +781,7 @@
                 let imageUrl = '';
 
                 if (file) {
-                    const storageRef = ref(storage, `posts/${currentUser.uid}/${Date.now()}_${file.name}`);
+                    const storageRef = ref(storage, `storage/posts/${currentUser.uid}/${Date.now()}_${file.name}`);
                     await uploadBytes(storageRef, file);
                     imageUrl = await getDownloadURL(storageRef);
                 }
@@ -826,7 +825,7 @@
 
             const postAvatar = document.createElement('img');
             postAvatar.classList.add('post-avatar');
-            postAvatar.src = userData.avatar || 'https://img.icons8.com/ios/50/ffffff/user.png';
+            postAvatar.src = userData.avatar || 'https://imgicons8.com/ios/50/ffffff/user.png';
             postAvatar.alt = 'avatar';
             postHeader.appendChild(postAvatar);
 
