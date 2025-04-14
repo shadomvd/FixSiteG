@@ -4,12 +4,12 @@ import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, getDo
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyDmXvrvFGx41c5Ulk9zN1WroeCOfHeoUwE",
+    authDomain: "fixsiteg.firebaseapp.com",
+    projectId: "fixsiteg",
+    storageBucket: "fixsiteg.firebasestorage.app",
+    messagingSenderId: "1061245740426",
+    appId: "1:1061245740426:web:d51058e56016c932b49473"
 };
 
 const app = initializeApp(firebaseConfig);
