@@ -485,8 +485,9 @@
             <button class="save-button" id="save-button">Сохранить</button>
         </div>
     </div>
-    <script>
-        // Элементы DOM
+    <script type="module">
+        import { auth, db, storage, onAuthStateChanged, doc, getDoc, setDoc, ref, uploadBytes, getDownloadURL, signOut } from './database.js';
+
         const profileAvatar = document.querySelector('#profile-avatar');
         const avatarUpload = document.querySelector('#avatar-upload');
         const profileUsername = document.querySelector('#profile-username');
@@ -506,83 +507,59 @@
         const navItems = document.querySelectorAll('.nav-item');
         const loadingOverlay = document.querySelector('#loading-overlay');
 
-        // Уникальный ID пользователя (для простоты используем фиксированный ID)
-        const userId = 'user123';
+        let currentUser = null;
 
-        // Инициализация "папки" в localStorage
-        function initStorage() {
-            if (!localStorage.getItem('avatars_folder')) {
-                localStorage.setItem('avatars_folder', JSON.stringify({}));
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadProfile();
+            } else {
+                window.location.href = 'auth.html';
             }
-            if (!localStorage.getItem('users')) {
-                localStorage.setItem('users', JSON.stringify({}));
-            }
-        }
+        });
 
-        // Загрузка профиля
-        function loadProfile() {
-            const users = JSON.parse(localStorage.getItem('users')) || {};
-            const userData = users[userId] || {
+        async function loadProfile() {
+            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+            const userData = userDoc.exists() ? userDoc.data() : {
                 username: 'Guest',
                 bio: 'О себе...',
+                avatar: 'https://img.icons8.com/ios/50/ffffff/user.png',
                 subscriptions: 0,
                 subscribers: 0,
                 likes: 0
             };
-            const avatars = JSON.parse(localStorage.getItem('avatars_folder')) || {};
-            const avatar = avatars[userId] || 'https://img.icons8.com/ios/50/ffffff/user.png';
 
             profileUsername.textContent = userData.username;
             profileBio.textContent = userData.bio;
-            profileAvatar.src = avatar;
-            statSubscriptions.textContent = userData.subscriptions;
-            statSubscribers.textContent = userData.subscribers;
-            statLikes.textContent = userData.likes;
+            profileAvatar.src = userData.avatar;
+            statSubscriptions.textContent = userData.subscriptions || 0;
+            statSubscribers.textContent = userData.subscribers || 0;
+            statLikes.textContent = userData.likes || 0;
         }
 
-        // Сохранение профиля
-        function saveProfile(data) {
-            const users = JSON.parse(localStorage.getItem('users')) || {};
-            users[userId] = { ...users[userId], ...data };
-            localStorage.setItem('users', JSON.stringify(users));
-        }
-
-        // Сохранение аватарки
-        function saveAvatar(avatarData) {
-            const avatars = JSON.parse(localStorage.getItem('avatars_folder')) || {};
-            avatars[userId] = avatarData;
-            localStorage.setItem('avatars_folder', JSON.stringify(avatars));
-        }
-
-        // Инициализация
-        initStorage();
-        loadProfile();
-
-        // Загрузка аватарки
         profileAvatar.addEventListener('click', () => {
             avatarUpload.click();
         });
 
-        avatarUpload.addEventListener('change', (e) => {
+        avatarUpload.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (file) {
                 loadingOverlay.classList.add('active');
-                const reader = new FileReader();
-                reader.onload = () => {
-                    const avatarData = reader.result;
-                    saveAvatar(avatarData);
-                    profileAvatar.src = avatarData;
-                    loadingOverlay.classList.remove('active');
-                };
-                reader.onerror = () => {
+                try {
+                    const storageRef = ref(storage, `storage/avatars/${currentUser.uid}/${Date.now()}_${file.name}`);
+                    await uploadBytes(storageRef, file);
+                    const avatarUrl = await getDownloadURL(storageRef);
+
+                    await setDoc(doc(db, 'users', currentUser.uid), { avatar: avatarUrl }, { merge: true });
+                    profileAvatar.src = avatarUrl;
+                } catch (error) {
                     alert('Ошибка загрузки аватара!');
-                    loadingOverlay.classList.remove('active');
-                };
-                reader.readAsDataURL(file);
+                    console.error(error);
+                }
+                loadingOverlay.classList.remove('active');
             }
         });
 
-        // Редактирование профиля
         editProfileButton.addEventListener('click', () => {
             modal.classList.add('active');
             editUsername.value = profileUsername.textContent;
@@ -593,25 +570,29 @@
             modal.classList.remove('active');
         });
 
-        saveButton.addEventListener('click', () => {
+        saveButton.addEventListener('click', async () => {
             const newUsername = editUsername.value.trim();
             const newBio = editBio.value.trim();
             if (newUsername) {
                 loadingOverlay.classList.add('active');
-                saveProfile({
-                    username: newUsername,
-                    bio: newBio || 'О себе...'
-                });
-                profileUsername.textContent = newUsername;
-                profileBio.textContent = newBio || 'О себе...';
-                modal.classList.remove('active');
+                try {
+                    await setDoc(doc(db, 'users', currentUser.uid), {
+                        username: newUsername,
+                        bio: newBio || 'О себе...'
+                    }, { merge: true });
+                    profileUsername.textContent = newUsername;
+                    profileBio.textContent = newBio || 'О себе...';
+                    modal.classList.remove('active');
+                } catch (error) {
+                    alert('Ошибка сохранения профиля!');
+                    console.error(error);
+                }
                 loadingOverlay.classList.remove('active');
             } else {
                 alert('Логин не может быть пустым!');
             }
         });
 
-        // Заглушки для кнопок
         settingsButton.addEventListener('click', () => {
             alert('Настройки пока не реализованы!');
         });
@@ -620,26 +601,25 @@
             alert('Избранное пока не реализовано!');
         });
 
-        logoutButton.addEventListener('click', () => {
+        logoutButton.addEventListener('click', async () => {
             loadingOverlay.classList.add('active');
-            setTimeout(() => {
-                // Симуляция выхода (очистка данных пользователя)
-                localStorage.removeItem('users');
-                localStorage.removeItem('avatars_folder');
-                loadingOverlay.classList.remove('active');
-                alert('Вы вышли из аккаунта!');
-                loadProfile(); // Сброс до дефолтных значений
-            }, 1000);
+            try {
+                await signOut(auth);
+                window.location.href = 'auth.html';
+            } catch (error) {
+                alert('Ошибка при выходе!');
+                console.error(error);
+            }
+            loadingOverlay.classList.remove('active');
         });
 
-        // Навигация
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 navItems.forEach(i => i.classList.remove('active'));
                 item.classList.add('active');
                 const navText = item.querySelector('.nav-text').textContent;
                 if (navText === 'Главное') {
-                    alert('Переход на главную страницу (заглушка)!');
+                    window.location.href = 'index.html';
                 } else if (navText === 'Лидеры') {
                     alert('Переход на страницу лидеров (заглушка)!');
                 }
