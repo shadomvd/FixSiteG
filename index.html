@@ -628,9 +628,8 @@
         const content = document.querySelector('#content');
         const loadingOverlay = document.querySelector('#loading-overlay');
 
-        // Конфигурация Cloudinary
-        const CLOUDINARY_CLOUD_NAME = 'dejwzfzhnp'; // Твой Cloud Name из скриншота
-        const CLOUDINARY_UPLOAD_PRESET = 'FixWorked'; // Замени на твой Upload Preset
+        // Конфигурация Imgur
+        const IMGUR_CLIENT_ID = 'YOUR_IMGUR_CLIENT_ID'; // Замени на твой Client ID
 
         let currentUser = null;
 
@@ -775,24 +774,28 @@
             }
         });
 
-        async function uploadToCloudinary(file) {
+        async function uploadToImgur(file) {
             const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            formData.append('image', file);
+            formData.append('type', 'file');
 
             try {
-                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                const response = await fetch('https://api.imgur.com/3/image', {
                     method: 'POST',
+                    headers: {
+                        Authorization: `Client-ID ${IMGUR_CLIENT_ID}`,
+                        Accept: 'application/json'
+                    },
                     body: formData
                 });
                 const data = await response.json();
-                if (data.secure_url) {
-                    return data.secure_url;
+                if (data.success && data.data.link) {
+                    return data.data.link;
                 } else {
-                    throw new Error('Ошибка загрузки изображения');
+                    throw new Error('Ошибка загрузки изображения в Imgur');
                 }
             } catch (error) {
-                console.error('Cloudinary upload error:', error);
+                console.error('Imgur upload error:', error);
                 throw error;
             }
         }
@@ -808,7 +811,7 @@
 
                 if (file) {
                     try {
-                        imageUrl = await uploadToCloudinary(file);
+                        imageUrl = await uploadToImgur(file);
                     } catch (error) {
                         alert('Ошибка загрузки изображения!');
                         loadingOverlay.classList.remove('active');
