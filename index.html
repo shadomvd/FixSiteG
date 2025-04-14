@@ -610,7 +610,7 @@
         </div>
     </div>
     <script type="module">
-        import { auth, db, storage, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy, ref, uploadBytes, getDownloadURL } from './database.js';
+        import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy } from './database.js';
 
         const searchInput = document.querySelector('.search-input');
         const notFoundCard = document.querySelector('.not-found-card');
@@ -627,6 +627,10 @@
         const postText = document.querySelector('#post-text');
         const content = document.querySelector('#content');
         const loadingOverlay = document.querySelector('#loading-overlay');
+
+        // Конфигурация Cloudinary
+        const CLOUDINARY_CLOUD_NAME = 'YOUR_CLOUD_NAME'; // Замени на твое Cloud Name
+        const CLOUDINARY_UPLOAD_PRESET = 'YOUR_UPLOAD_PRESET'; // Замени на твой Upload Preset
 
         let currentUser = null;
 
@@ -771,6 +775,28 @@
             }
         });
 
+        async function uploadToCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.secure_url) {
+                    return data.secure_url;
+                } else {
+                    throw new Error('Ошибка загрузки изображения');
+                }
+            } catch (error) {
+                console.error('Cloudinary upload error:', error);
+                throw error;
+            }
+        }
+
         publishButton.addEventListener('click', async () => {
             const title = postTitle.value.trim();
             const text = postText.value.trim();
@@ -781,9 +807,13 @@
                 let imageUrl = '';
 
                 if (file) {
-                    const storageRef = ref(storage, `storage/posts/${currentUser.uid}/${Date.now()}_${file.name}`);
-                    await uploadBytes(storageRef, file);
-                    imageUrl = await getDownloadURL(storageRef);
+                    try {
+                        imageUrl = await uploadToCloudinary(file);
+                    } catch (error) {
+                        alert('Ошибка загрузки изображения!');
+                        loadingOverlay.classList.remove('active');
+                        return;
+                    }
                 }
 
                 const postData = {
@@ -797,10 +827,15 @@
                     comments: 0
                 };
 
-                await addDoc(collection(db, 'posts'), postData);
-                modal.classList.remove('active');
-                resetModal();
-                await loadPosts();
+                try {
+                    await addDoc(collection(db, 'posts'), postData);
+                    modal.classList.remove('active');
+                    resetModal();
+                    await loadPosts();
+                } catch (error) {
+                    alert('Ошибка публикации поста!');
+                    console.error(error);
+                }
                 loadingOverlay.classList.remove('active');
             } else {
                 alert('Добавьте хотя бы заголовок, текст или изображение!');
@@ -825,7 +860,7 @@
 
             const postAvatar = document.createElement('img');
             postAvatar.classList.add('post-avatar');
-            postAvatar.src = userData.avatar || 'https://imgicons8.com/ios/50/ffffff/user.png';
+            postAvatar.src = userData.avatar || 'https://img.icons8.com/ios/50/ffffff/user.png';
             postAvatar.alt = 'avatar';
             postHeader.appendChild(postAvatar);
 
