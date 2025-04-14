@@ -6,6 +6,7 @@
     <title>FixSite - Соцсеть</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        /* Стили остаются без изменений */
         * {
             margin: 0;
             padding: 0;
@@ -15,7 +16,6 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-
         html, body {
             height: 100%;
             background: #0f0f1a;
@@ -27,7 +27,6 @@
             -webkit-text-size-adjust: none;
             text-size-adjust: none;
         }
-
         .container {
             display: flex;
             flex-direction: column;
@@ -40,7 +39,6 @@
             position: relative;
             touch-action: none;
         }
-
         .content {
             flex-grow: 1;
             padding-bottom: 80px;
@@ -50,7 +48,6 @@
             overflow-y: auto;
             touch-action: pan-y;
         }
-
         .nav-bar {
             width: 100%;
             background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
@@ -67,7 +64,6 @@
             position: relative;
             border: 1px solid rgba(100, 100, 150, 0.2);
         }
-
         .nav-bar-title {
             display: flex;
             align-items: center;
@@ -77,7 +73,6 @@
             gap: 8px;
             position: relative;
         }
-
         .nav-bar img.plus-icon {
             position: absolute;
             right: 16px;
@@ -87,16 +82,13 @@
             transition: transform 0.2s, filter 0.2s;
             filter: brightness(1);
         }
-
         .nav-bar img.plus-icon:hover {
             transform: scale(1.1);
             filter: brightness(1.2) drop-shadow(0 0 8px rgba(100, 100, 255, 0.5));
         }
-
         .nav-bar img.plus-icon:active {
             animation: spinAndGlow 0.6s ease forwards;
         }
-
         @keyframes spinAndGlow {
             0% {
                 transform: scale(1) rotate(0deg);
@@ -111,18 +103,15 @@
                 filter: brightness(1) drop-shadow(0 0 0 rgba(100, 100, 255, 0));
             }
         }
-
         .verified-icon {
             width: 20px;
             height: 20px;
             cursor: pointer;
             transition: transform 0.2s;
         }
-
         .verified-icon:hover {
             transform: scale(1.1);
         }
-
         .verified-tooltip {
             display: none;
             position: absolute;
@@ -141,7 +130,6 @@
             opacity: 0;
             transition: opacity 0.2s ease, transform 0.2s ease;
         }
-
         .verified-icon:hover + .verified-tooltip,
         .verified-icon:active + .verified-tooltip,
         .verified-icon.show-tooltip + .verified-tooltip {
@@ -149,14 +137,12 @@
             opacity: 1;
             transform: translateX(-50%) translateY(4px);
         }
-
         .search-container {
             position: relative;
             width: 100%;
             max-width: 280px;
             margin: 0 auto 20px;
         }
-
         .search-input {
             width: 100%;
             padding: 12px 40px 12px 16px;
@@ -170,13 +156,11 @@
             transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
             user-select: auto;
         }
-
         .search-input:focus {
             border-color: #6464ff;
             box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
             transform: scale(1.02);
         }
-
         .search-icon {
             position: absolute;
             right: 12px;
@@ -187,11 +171,9 @@
             filter: brightness(0.8);
             transition: filter 0.2s;
         }
-
         .search-input:focus + .search-icon {
             filter: brightness(1);
         }
-
         .not-found-card {
             display: none;
             text-align: center;
@@ -205,30 +187,25 @@
             animation: slideIn 0.4s ease forwards;
             border: 1px solid rgba(100, 100, 150, 0.2);
         }
-
         .not-found-card.active {
             display: block;
             opacity: 1;
         }
-
         .not-found-card img {
             width: 36px;
             height: 36px;
             margin-bottom: 10px;
             filter: brightness(1);
         }
-
         .not-found-card p {
             font-size: 15px;
             font-weight: 500;
             color: #aaaaaa;
         }
-
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes immerseIn {
             0% {
                 opacity: 0;
@@ -241,7 +218,6 @@
                 filter: blur(0);
             }
         }
-
         .navigation {
             position: fixed;
             bottom: 0;
@@ -259,7 +235,6 @@
             z-index: 100;
             border-top: 1px solid rgba(100, 100, 150, 0.2);
         }
-
         .nav-item {
             display: flex;
             flex-direction: column;
@@ -271,15 +246,12 @@
             padding: 8px;
             transition: color 0.2s, transform 0.2s;
         }
-
         .nav-item:hover {
             color: #ffffff;
         }
-
         .nav-item:active {
             transform: scale(0.95);
         }
-
         .nav-item img {
             width: 24px;
             height: 24px;
@@ -287,24 +259,19 @@
             filter: brightness(0.5);
             transition: filter 0.2s;
         }
-
         .nav-item:hover img {
             filter: brightness(1);
         }
-
         .nav-text {
             font-size: 11px;
             font-weight: 500;
         }
-
         .nav-item.active {
             color: #6464ff;
         }
-
         .nav-item.active img {
             filter: brightness(1);
         }
-
         .post {
             background: linear-gradient(145deg, #222233, #1a1a2a);
             padding: 16px;
@@ -318,19 +285,16 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             animation: immerseIn 0.5s ease forwards;
         }
-
         .post:hover {
             transform: translateY(-4px);
             box-shadow: 0 6px 16px rgba(100, 100, 255, 0.2);
         }
-
         .post-header {
             display: flex;
             align-items: center;
             gap: 8px;
             margin-bottom: 10px;
         }
-
         .post-avatar {
             width: 32px;
             height: 32px;
@@ -339,19 +303,16 @@
             background: #1a1a2a;
             border: 1px solid #444455;
         }
-
         .post-username {
             font-size: 14px;
             font-weight: 600;
             color: #c9d1d9;
         }
-
         .post-time {
             font-size: 11px;
             color: #8b949e;
             margin-top: 3px;
         }
-
         .post-image {
             width: 100%;
             max-height: 200px;
@@ -360,21 +321,18 @@
             border-radius: 8px;
             border: 1px solid #303044;
         }
-
         .post-title {
             font-size: 16px;
             font-weight: 700;
             color: #ffffff;
             line-height: 1.4;
         }
-
         .post-text {
             font-size: 14px;
             font-weight: 400;
             color: #c9d1d9;
             line-height: 1.5;
         }
-
         .post-actions {
             display: flex;
             align-items: center;
@@ -382,7 +340,6 @@
             padding-top: 10px;
             border-top: 1px solid #303044;
         }
-
         .action-item {
             display: flex;
             align-items: center;
@@ -392,31 +349,25 @@
             font-size: 13px;
             transition: color 0.2s, transform 0.2s;
         }
-
         .action-item img {
             width: 20px;
             height: 20px;
             filter: brightness(0.7);
             transition: filter 0.2s, transform 0.2s;
         }
-
         .action-item:hover {
             color: #ffffff;
         }
-
         .action-item:hover img {
             filter: brightness(1);
             transform: scale(1.15);
         }
-
         .action-item.active {
             color: #6464ff;
         }
-
         .action-item.active img {
             filter: brightness(1);
         }
-
         .modal {
             display: none;
             position: fixed;
@@ -431,12 +382,10 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-
         .modal.active {
             display: flex;
             opacity: 1;
         }
-
         .modal-content {
             background: linear-gradient(145deg, #222233, #1a1a2a);
             padding: 20px;
@@ -450,12 +399,10 @@
             opacity: 0;
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
-
         .modal.active .modal-content {
             transform: scale(1);
             opacity: 1;
         }
-
         .modal-close {
             position: absolute;
             top: 10px;
@@ -466,12 +413,10 @@
             filter: brightness(0.8);
             transition: filter 0.2s, transform 0.2s;
         }
-
         .modal-close:hover {
             filter: brightness(1);
             transform: rotate(90deg);
         }
-
         .modal-content h2 {
             font-size: 18px;
             font-weight: 700;
@@ -480,7 +425,6 @@
             color: #c9d1d9;
             animation: fadeInElement 0.5s ease forwards;
         }
-
         .modal-content input,
         .modal-content textarea {
             width: 100%;
@@ -498,13 +442,11 @@
             transition: border-color 0.2s, box-shadow 0.2s;
             animation: fadeInElement 0.5s ease forwards;
         }
-
         .modal-content input:focus,
         .modal-content textarea:focus {
             border-color: #6464ff;
             box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
         }
-
         .image-upload {
             width: 100%;
             height: 100px;
@@ -522,33 +464,27 @@
             transition: border-color 0.2s, background 0.2s;
             animation: fadeInElement 0.5s ease forwards;
         }
-
         .image-upload:hover {
             border-color: #6464ff;
             background: #222233;
         }
-
         .image-upload img.placeholder {
             width: 36px;
             height: 36px;
             filter: brightness(0.7);
             transition: transform 0.3s ease;
         }
-
         .image-upload:hover img.placeholder {
             transform: scale(1.1);
         }
-
         .image-upload p {
             font-size: 12px;
             color: #8b949e;
             margin-top: 6px;
         }
-
         .image-upload input[type="file"] {
             display: none;
         }
-
         .image-preview {
             display: none;
             width: 100%;
@@ -559,16 +495,13 @@
             left: 0;
             background: #1a1a2a;
         }
-
         .image-upload.has-image .placeholder,
         .image-upload.has-image p {
             display: none;
         }
-
         .image-upload.has-image .image-preview {
             display: block;
         }
-
         .publish-button {
             width: 100%;
             padding: 10px;
@@ -583,23 +516,19 @@
             transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
             animation: fadeInElement 0.5s ease forwards;
         }
-
         .publish-button:hover {
             background: linear-gradient(145deg, #5a5aff, #4141ff);
             transform: scale(1.02);
             box-shadow: 0 4px 15px rgba(100, 100, 255, 0.5);
         }
-
         .publish-button:active {
             transform: scale(0.98);
             box-shadow: 0 2px 10px rgba(100, 100, 255, 0.4);
         }
-
         @keyframes fadeInElement {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .loading-overlay {
             display: none;
             position: fixed;
@@ -612,11 +541,9 @@
             justify-content: center;
             align-items: center;
         }
-
         .loading-overlay.active {
             display: flex;
         }
-
         .loader {
             border: 4px solid #6464ff;
             border-top: 4px solid transparent;
@@ -625,7 +552,6 @@
             height: 40px;
             animation: spin 1s linear infinite;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -650,8 +576,7 @@
             <img class="search-icon" src="https://img.icons8.com/ios/50/ffffff/search--v1.png" alt="search"/>
         </div>
         <div class="not-found-card" id="not-found">
-            <img src="https://img.icons8.com/ios/50/ffffff/sad.png" alt="sad"/>
-            <p>Ничего не найдено</p>
+            <img src="https://img.icons8.com/ios/50/ffffff/sad.png" alt="sad  <p>Ничего не найдено</p>
         </div>
         <div class="content" id="content"></div>
         <div class="navigation">
@@ -805,19 +730,7 @@
 
         modalClose.addEventListener('click', () => {
             modal.classList.remove('active');
-        });
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-                document.activeElement.blur();
-            }
-        });
-
-        container.addEventListener('touchstart', (e) => {
-            if (e.target === container || e.target === content) {
-                document.activeElement.blur();
-            }
+            resetModal();
         });
 
         imageUpload.addEventListener('click', () => {
@@ -974,9 +887,9 @@
             dislikeIcon.alt = 'dislike';
             const dislikeCount = document.createElement('span');
             dislikeCount.textContent = postData.dislikes;
-            postActions.appendChild(dislikeAction);
             dislikeAction.appendChild(dislikeIcon);
             dislikeAction.appendChild(dislikeCount);
+            postActions.appendChild(dislikeAction);
 
             const commentAction = document.createElement('div');
             commentAction.classList.add('action-item');
