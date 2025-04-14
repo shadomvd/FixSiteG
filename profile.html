@@ -6,6 +6,7 @@
     <title>FixSite - Профиль</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        /* Стили остаются без изменений */
         * {
             margin: 0;
             padding: 0;
@@ -15,7 +16,6 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-
         html, body {
             height: 100%;
             background: #0f0f1a;
@@ -27,7 +27,6 @@
             -webkit-text-size-adjust: none;
             text-size-adjust: none;
         }
-
         .container {
             display: flex;
             flex-direction: column;
@@ -40,7 +39,6 @@
             position: relative;
             touch-action: none;
         }
-
         .content {
             flex-grow: 1;
             padding-bottom: 80px;
@@ -50,7 +48,6 @@
             overflow-y: auto;
             touch-action: pan-y;
         }
-
         .nav-bar {
             width: 100%;
             background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
@@ -67,7 +64,6 @@
             position: relative;
             border: 1px solid rgba(100, 100, 150, 0.2);
         }
-
         .nav-bar-title {
             display: flex;
             align-items: center;
@@ -77,7 +73,6 @@
             gap: 8px;
             position: relative;
         }
-
         .profile-section {
             background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
             padding: 20px;
@@ -91,7 +86,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .profile-section::before {
             content: '';
             position: absolute;
@@ -103,7 +97,6 @@
             opacity: 0.4;
             z-index: 0;
         }
-
         .profile-avatar {
             width: 80px;
             height: 80px;
@@ -114,11 +107,9 @@
             cursor: pointer;
             z-index: 1;
         }
-
         .avatar-upload {
             display: none;
         }
-
         .profile-username-container {
             display: flex;
             flex-direction: column;
@@ -128,7 +119,6 @@
             width: 100%;
             max-width: 250px;
         }
-
         .profile-username {
             font-size: 18px;
             font-weight: 600;
@@ -137,7 +127,6 @@
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
             letter-spacing: 0.3px;
         }
-
         .profile-bio {
             font-size: 13px;
             font-weight: 400;
@@ -154,7 +143,6 @@
             max-width: 250px;
             line-height: 1.3;
         }
-
         .profile-stats {
             display: flex;
             justify-content: space-around;
@@ -164,26 +152,22 @@
             border-bottom: 1px solid rgba(100, 100, 150, 0.3);
             z-index: 1;
         }
-
         .stat-item {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
         }
-
         .stat-number {
             font-size: 16px;
             font-weight: 600;
             color: #6464ff;
         }
-
         .stat-label {
             font-size: 12px;
             font-weight: 400;
             color: #8b949e;
         }
-
         .edit-profile-button {
             position: absolute;
             top: 10px;
@@ -194,7 +178,6 @@
             filter: brightness(0.8);
             z-index: 2;
         }
-
         .settings-section {
             background: linear-gradient(145deg, #222233, #1a1a2a);
             padding: 16px;
@@ -205,7 +188,6 @@
             gap: 12px;
             border: 0.5px solid rgba(100, 100, 150, 0.2);
         }
-
         .settings-button {
             width: 100%;
             padding: 12px;
@@ -223,30 +205,25 @@
             justify-content: center;
             gap: 8px;
         }
-
         .settings-button img {
             width: 20px;
             height: 20px;
             filter: brightness(0.8);
             transition: filter 0.2s;
         }
-
         .settings-button:hover {
             background: linear-gradient(145deg, #3a3a4a, #2a2a3a);
             color: #ffffff;
             transform: scale(1.02);
             box-shadow: 0 4px 12px rgba(100, 100, 255, 0.3);
         }
-
         .settings-button:hover img {
             filter: brightness(1);
         }
-
         .settings-button:active {
             transform: scale(0.98);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
-
         .modal {
             display: none;
             position: fixed;
@@ -261,12 +238,10 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-
         .modal.active {
             display: flex;
             opacity: 1;
         }
-
         .modal-content {
             background: linear-gradient(145deg, #222233, #1a1a2a);
             padding: 20px;
@@ -280,12 +255,10 @@
             opacity: 0;
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
-
         .modal.active .modal-content {
             transform: scale(1);
             opacity: 1;
         }
-
         .modal-close {
             position: absolute;
             top: 10px;
@@ -296,12 +269,10 @@
             filter: brightness(0.8);
             transition: filter 0.2s, transform 0.2s;
         }
-
         .modal-close:hover {
             filter: brightness(1);
             transform: rotate(90deg);
         }
-
         .modal-content h2 {
             font-size: 18px;
             font-weight: 700;
@@ -310,7 +281,6 @@
             color: #c9d1d9;
             animation: fadeInElement 0.5s ease forwards;
         }
-
         .modal-content input,
         .modal-content textarea {
             width: 100%;
@@ -328,13 +298,11 @@
             transition: border-color 0.2s, box-shadow 0.2s;
             animation: fadeInElement 0.5s ease forwards;
         }
-
         .modal-content input:focus,
         .modal-content textarea:focus {
             border-color: #6464ff;
             box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
         }
-
         .save-button {
             width: 100%;
             padding: 10px;
@@ -349,23 +317,19 @@
             transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
             animation: fadeInElement 0.5s ease forwards;
         }
-
         .save-button:hover {
             background: linear-gradient(145deg, #5a5aff, #4141ff);
             transform: scale(1.02);
             box-shadow: 0 4px 15px rgba(100, 100, 255, 0.5);
         }
-
         .save-button:active {
             transform: scale(0.98);
             box-shadow: 0 2px 10px rgba(100, 100, 255, 0.4);
         }
-
         @keyframes fadeInElement {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .loading-overlay {
             display: none;
             position: fixed;
@@ -378,11 +342,9 @@
             justify-content: center;
             align-items: center;
         }
-
         .loading-overlay.active {
             display: flex;
         }
-
         .loader {
             border: 4px solid #6464ff;
             border-top: 4px solid transparent;
@@ -391,12 +353,10 @@
             height: 40px;
             animation: spin 1s linear infinite;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
         .navigation {
             position: fixed;
             bottom: 0;
@@ -414,7 +374,6 @@
             z-index: 100;
             border-top: 1px solid rgba(100, 100, 150, 0.2);
         }
-
         .nav-item {
             display: flex;
             flex-direction: column;
@@ -426,15 +385,12 @@
             padding: 8px;
             transition: color 0.2s, transform 0.2s;
         }
-
         .nav-item:hover {
             color: #ffffff;
         }
-
         .nav-item:active {
             transform: scale(0.95);
         }
-
         .nav-item img {
             width: 24px;
             height: 24px;
@@ -442,20 +398,16 @@
             filter: brightness(0.5);
             transition: filter 0.2s;
         }
-
         .nav-item:hover img {
             filter: brightness(1);
         }
-
         .nav-text {
             font-size: 11px;
             font-weight: 500;
         }
-
         .nav-item.active {
             color: #6464ff;
         }
-
         .nav-item.active img {
             filter: brightness(1);
         }
@@ -469,14 +421,16 @@
         <div class="nav-bar">
             <div class="nav-bar-title">
                 FixSite
+                <img class="verified-icon" src="https://img.icons8.com/color/48/instagram-verification-badge.png" alt="verified"/>
+                <span class="verified-tooltip">Проект верифицирован</span>
             </div>
         </div>
         <div class="content">
             <div class="profile-section">
                 <img class="profile-avatar" id="profile-avatar" src="https://img.icons8.com/ios/50/ffffff/user.png" alt="avatar"/>
-                <input type="file" class="avatar-upload" id="avatar-upload" accept="image/*">
+                <input type="file" id="avatar-upload" class="avatar-upload" accept="image/*">
                 <div class="profile-username-container">
-                    <div class="profile-username" id="profile-username">Гость</div>
+                    <div class="profile-username" id="profile-username">Guest</div>
                     <div class="profile-bio" id="profile-bio">О себе...</div>
                 </div>
                 <div class="profile-stats">
@@ -493,11 +447,11 @@
                         <div class="stat-label">Лайки</div>
                     </div>
                 </div>
-                <img class="edit-profile-button" id="edit-profile-button" src="https://img.icons8.com/ios/50/ffffff/edit.png" alt="edit"/>
+                <img class="edit-profile-button" id="edit-profile-button" src="https://img.icons8.com/ios/50/ffffff/edit--v1.png" alt="edit"/>
             </div>
             <div class="settings-section">
                 <button class="settings-button" id="logout-button">
-                    <img src="https://img.icons8.com/ios/50/ffffff/logout-rounded.png" alt="logout"/>
+                    <img src="https://img.icons8.com/ios/50/ffffff/exit.png" alt="logout"/>
                     Выйти
                 </button>
             </div>
@@ -519,15 +473,15 @@
     </div>
     <div class="modal" id="edit-modal">
         <div class="modal-content">
-            <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
+            <img class="modal-close" id="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
             <h2>Редактировать профиль</h2>
-            <input type="text" id="edit-username" placeholder="Логин" maxlength="20">
+            <input type="text" id="edit-username" placeholder="Логин (макс. 16 символов)" maxlength="16">
             <textarea id="edit-bio" placeholder="О себе (макс. 100 символов)" maxlength="100"></textarea>
             <button class="save-button" id="save-button">Сохранить</button>
         </div>
     </div>
     <script type="module">
-        import { auth, db, storage, signOut, onAuthStateChanged, doc, getDoc, updateDoc, ref, uploadBytes, getDownloadURL } from './database.js';
+        import { auth, db, storage, onAuthStateChanged, doc, getDoc, setDoc, signOut, ref, uploadBytes, getDownloadURL } from './database.js';
 
         const profileAvatar = document.querySelector('#profile-avatar');
         const avatarUpload = document.querySelector('#avatar-upload');
@@ -539,12 +493,13 @@
         const editProfileButton = document.querySelector('#edit-profile-button');
         const logoutButton = document.querySelector('#logout-button');
         const modal = document.querySelector('#edit-modal');
-        const modalClose = document.querySelector('.modal-close');
+        const modalClose = document.querySelector('#modal-close');
         const editUsername = document.querySelector('#edit-username');
         const editBio = document.querySelector('#edit-bio');
         const saveButton = document.querySelector('#save-button');
-        const loadingOverlay = document.querySelector('#loading-overlay');
         const navItems = document.querySelectorAll('.nav-item');
+        const loadingOverlay = document.querySelector('#loading-overlay');
+        const verifiedIcon = document.querySelector('.verified-icon');
 
         let currentUser = null;
 
@@ -559,17 +514,13 @@
 
         async function loadProfile() {
             const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                profileUsername.textContent = userData.username || 'Гость';
-                profileBio.textContent = userData.bio || 'О себе...';
-                profileAvatar.src = userData.avatar || 'https://img.icons8.com/ios/50/ffffff/user.png';
-                statSubscriptions.textContent = userData.subscriptions || 0;
-                statSubscribers.textContent = userData.subscribers || 0;
-                statLikes.textContent = userData.likes || 0;
-                editUsername.value = userData.username || '';
-                editBio.value = userData.bio || '';
-            }
+            const userData = userDoc.data();
+            profileUsername.textContent = userData.username || 'Guest';
+            profileBio.textContent = userData.bio || 'О себе...';
+            profileAvatar.src = userData.avatar || 'https://img.icons8.com/ios/50/ffffff/user.png';
+            statSubscriptions.textContent = userData.subscriptions || 0;
+            statSubscribers.textContent = userData.subscribers || 0;
+            statLikes.textContent = userData.likes || 0;
         }
 
         profileAvatar.addEventListener('click', () => {
@@ -580,54 +531,38 @@
             const file = e.target.files[0];
             if (file) {
                 loadingOverlay.classList.add('active');
-                try {
-                    const storageRef = ref(storage, `avatars/${currentUser.uid}/${Date.now()}_${file.name}`);
-                    await uploadBytes(storageRef, file);
-                    const avatarUrl = await getDownloadURL(storageRef);
-                    await updateDoc(doc(db, 'users', currentUser.uid), { avatar: avatarUrl });
-                    profileAvatar.src = avatarUrl;
-                } catch (error) {
-                    alert('Ошибка загрузки аватара: ' + error.message);
-                } finally {
-                    loadingOverlay.classList.remove('active');
-                }
+                const storageRef = ref(storage, `avatars/${currentUser.uid}/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                const avatarUrl = await getDownloadURL(storageRef);
+                await setDoc(doc(db, 'users', currentUser.uid), { avatar: avatarUrl }, { merge: true });
+                profileAvatar.src = avatarUrl;
+                loadingOverlay.classList.remove('active');
             }
         });
 
         editProfileButton.addEventListener('click', () => {
             modal.classList.add('active');
+            editUsername.value = profileUsername.textContent;
+            editBio.value = profileBio.textContent === 'О себе...' ? '' : profileBio.textContent;
         });
 
         modalClose.addEventListener('click', () => {
             modal.classList.remove('active');
         });
 
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-                document.activeElement.blur();
-            }
-        });
-
         saveButton.addEventListener('click', async () => {
-            const username = editUsername.value.trim();
-            const bio = editBio.value.trim();
-
-            if (username) {
+            const newUsername = editUsername.value.trim();
+            const newBio = editBio.value.trim();
+            if (newUsername) {
                 loadingOverlay.classList.add('active');
-                try {
-                    await updateDoc(doc(db, 'users', currentUser.uid), {
-                        username,
-                        bio
-                    });
-                    profileUsername.textContent = username;
-                    profileBio.textContent = bio || 'О себе...';
-                    modal.classList.remove('active');
-                } catch (error) {
-                    alert('Ошибка сохранения профиля: ' + error.message);
-                } finally {
-                    loadingOverlay.classList.remove('active');
-                }
+                await setDoc(doc(db, 'users', currentUser.uid), {
+                    username: newUsername,
+                    bio: newBio
+                }, { merge: true });
+                profileUsername.textContent = newUsername;
+                profileBio.textContent = newBio || 'О себе...';
+                modal.classList.remove('active');
+                loadingOverlay.classList.remove('active');
             } else {
                 alert('Логин не может быть пустым!');
             }
@@ -635,25 +570,30 @@
 
         logoutButton.addEventListener('click', async () => {
             loadingOverlay.classList.add('active');
-            try {
-                await signOut(auth);
-                window.location.href = 'auth.html';
-            } catch (error) {
-                alert('Ошибка выхода: ' + error.message);
-            } finally {
-                loadingOverlay.classList.remove('active');
-            }
+            await signOut(auth);
+            window.location.href = 'auth.html';
         });
 
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 navItems.forEach(i => i.classList.remove('active'));
                 item.classList.add('active');
-                const navText = item.querySelector('.nav-text').textContent;
-                if (navText === 'Главное') {
+                if (item.querySelector('.nav-text').textContent === 'Главное') {
                     window.location.href = 'index.html';
                 }
             });
+        });
+
+        verifiedIcon.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            verifiedIcon.classList.add('show-tooltip');
+            setTimeout(() => {
+                verifiedIcon.classList.remove('show-tooltip');
+            }, 2000);
+        });
+
+        verifiedIcon.addEventListener('click', () => {
+            verifiedIcon.classList.toggle('show-tooltip');
         });
     </script>
 </body>
