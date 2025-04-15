@@ -717,7 +717,7 @@
                 <div class="username-container">
                     <h2 id="avatar-modal-username">Пользователь</h2>
                 </div>
-                <div class="user-bio" id="avatar-modal-bio"></ festivals
+                <div class="user-bio" id="avatar-modal-bio"></div>
                 <div class="user-stats">
                     <div class="stat-item">
                         <div class="stat-number" id="stat-subscriptions">0</div>
@@ -750,6 +750,37 @@
     <script type="module">
         // Импорт функций Firebase
         import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy, onSnapshot } from './database.js';
+
+        // Инициализация приложения
+        async function initializeApp() {
+            // Проверка загрузки Firebase
+            if (!auth || !db || !onSnapshot) {
+                console.error('Firebase не загружен корректно. Проверьте database.js');
+                alert('Ошибка загрузки Firebase. Попробуйте позже.');
+                loadingOverlay.classList.remove('active');
+                return;
+            }
+
+            // Отслеживание состояния авторизации
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    loadingOverlay.classList.add('active');
+                    try {
+                        await loadPosts();
+                        listenForNewPosts();
+                        lastPostTimestamp = localStorage.getItem(`lastPost_${currentUser.uid}`) || null;
+                    } catch (error) {
+                        console.error('Ошибка загрузки постов:', error);
+                        alert('Не удалось загрузить посты. Проверьте соединение.');
+                    } finally {
+                        loadingOverlay.classList.remove('active');
+                    }
+                } else {
+                    window.location.href = 'auth.html';
+                }
+            });
+        }
 
         // Объявление переменных DOM
         const searchInput = document.querySelector('.search-input');
@@ -788,33 +819,8 @@
         let lastPostTimestamp = null;
         const POST_COOLDOWN = 5 * 60 * 1000;
 
-        // Проверка загрузки Firebase
-        if (!auth || !db || !onSnapshot) {
-            console.error('Firebase не загружен корректно. Проверьте database.js');
-            alert('Ошибка загрузки Firebase. Попробуйте позже.');
-            loadingOverlay.classList.remove('active');
-            return;
-        }
-
-        // Отслеживание состояния авторизации
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                loadingOverlay.classList.add('active');
-                try {
-                    await loadPosts();
-                    listenForNewPosts();
-                    lastPostTimestamp = localStorage.getItem(`lastPost_${currentUser.uid}`) || null;
-                } catch (error) {
-                    console.error('Ошибка загрузки постов:', error);
-                    alert('Не удалось загрузить посты. Проверьте соединение.');
-                } finally {
-                    loadingOverlay.classList.remove('active');
-                }
-            } else {
-                window.location.href = 'auth.html';
-            }
-        });
+        // Запуск инициализации
+        initializeApp();
 
         // Загрузка постов из Firestore
         async function loadPosts() {
@@ -976,7 +982,7 @@
             });
         });
 
-        // Обработчик для verifiedIcon (исправлено)
+        // Обработчик для verifiedIcon
         verifiedIcon.addEventListener('touchstart', () => {
             verifiedIcon.classList.add('show-tooltip');
             setTimeout(() => {
