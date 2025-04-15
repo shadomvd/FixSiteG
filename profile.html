@@ -171,8 +171,8 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            width: 18px;
-            height: 18px;
+            width: 16px; /* Уменьшено с 20px */
+            height: 16px; /* Уменьшено с 20px */
             cursor: pointer;
             filter: brightness(0.8);
             z-index: 2;
@@ -486,7 +486,7 @@
         </div>
     </div>
     <script type="module">
-        import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, signOut, collection, query, where, getDocs } from './database.js';
+        import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, signOut, collection, getDocs, query, where } from './database.js';
 
         const profileAvatar = document.querySelector('#profile-avatar');
         const avatarUpload = document.querySelector('#avatar-upload');
@@ -507,54 +507,57 @@
         const navItems = document.querySelectorAll('.nav-item');
         const loadingOverlay = document.querySelector('#loading-overlay');
 
-        const IMGUR_CLIENT_ID = '8ea63c636bd153e';
+        // Конфигурация Imgur
+        const IMGUR_CLIENT_ID = '8ea63c636bd153e'; // Ваш Client ID
+
         let currentUser = null;
-        let cachedProfile = null;
 
-        async function loadProfile() {
-            if (cachedProfile) {
-                updateProfileUI(cachedProfile);
-                await updateLikes();
-                return;
+        // Проверка авторизации
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadProfile();
+                await updateLikesFromPosts();
+            } else {
+                window.location.href = 'auth.html';
             }
+        });
 
-            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-            const userData = userDoc.exists() ? userDoc.data() : {
-                username: 'Guest',
-                bio: 'О себе...',
-                avatar: 'https://img.icons8.com/ios/50/ffffff/user.png',
-                subscriptions: 0,
-                subscribers: 0,
-                likes: 0
-            };
+        // Загрузка данных профиля
+        async function loadProfile() {
+            try {
+                const userDocRef = doc(db, 'users', currentUser.uid);
+                const userDoc = await getDoc(userDocRef);
+                const defaultData = {
+                    username: 'Guest',
+                    bio: 'О себе...',
+                    avatar: 'https://img.icons8.com/ios/50/ffffff/user.png',
+                    subscriptions: 0,
+                    subscribers: 0,
+                    likes: 0
+                };
 
-            cachedProfile = userData;
-            updateProfileUI(userData);
-            await updateLikes();
+                const userData = userDoc.exists() ? userDoc.data() : defaultData;
+
+                // Устанавливаем данные профиля
+                profileUsername.textContent = userData.username || defaultData.username;
+                profileBio.textContent = userData.bio || defaultData.bio;
+                profileAvatar.src = userData.avatar || defaultData.avatar;
+                statSubscriptions.textContent = userData.subscriptions || 0;
+                statSubscribers.textContent = userData.subscribers || 0;
+                statLikes.textContent = userData.likes || 0;
+
+                // Если данных нет, создаем документ с дефолтными значениями
+                if (!userDoc.exists()) {
+                    await setDoc(userDocRef, defaultData);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки профиля:', error);
+                alert('Ошибка загрузки профиля!');
+            }
         }
 
-        async function updateLikes() {
-            const postsQuery = query(collection(db, 'posts'), where('uid', '==', currentUser.uid));
-            const querySnapshot = await getDocs(postsQuery);
-            let totalLikes = 0;
-            querySnapshot.forEach(doc => {
-                totalLikes += doc.data().likes || 0;
-            });
-
-            cachedProfile.likes = totalLikes;
-            statLikes.textContent = totalLikes;
-            await setDoc(doc(db, 'users', currentUser.uid), { likes: totalLikes }, { merge: true });
-        }
-
-        function updateProfileUI(userData) {
-            profileUsername.textContent = userData.username;
-            profileBio.textContent = userData.bio;
-            profileAvatar.src = userData.avatar;
-            statSubscriptions.textContent = userData.subscriptions || 0;
-            statSubscribers.textContent = userData.subscribers || 0;
-            statLikes.textContent = userData.likes || 0;
-        }
-
+        // Загрузка изображения на Imgur
         async function uploadToImgur(file) {
             const formData = new FormData();
             formData.append('image', file);
@@ -581,6 +584,27 @@
             }
         }
 
+        // Подсчет лайков из постов пользователя
+        async function updateLikesFromPosts() {
+            try {
+                const postsQuery = query(collection(db, 'posts'), where('userId', '==', currentUser.uid));
+                const postsSnapshot = await getDocs(postsQuery);
+                let totalLikes = 0;
+
+                postsSnapshot.forEach(doc => {
+                    const postData = doc.data();
+                    totalLikes += postData.likes || 0;
+                });
+
+                // Обновляем лайки в профиле
+                await updateDoc(doc(db, 'users', currentUser.uid), { likes: totalLikes });
+                statLikes.textContent = totalLikes;
+            } catch (error) {
+                console.error('Ошибка подсчета лайков:', error);
+            }
+        }
+
+        // Загрузка аватара
         profileAvatar.addEventListener('click', () => {
             avatarUpload.click();
         });
@@ -593,24 +617,27 @@
                     const avatarUrl = await uploadToImgur(file);
                     await setDoc(doc(db, 'users', currentUser.uid), { avatar: avatarUrl }, { merge: true });
                     profileAvatar.src = avatarUrl;
-                    cachedProfile.avatar = avatarUrl;
                 } catch (error) {
                     alert('Ошибка загрузки аватара!');
+                    console.error(error);
                 }
                 loadingOverlay.classList.remove('active');
             }
         });
 
+        // Открытие модального окна редактирования
         editProfileButton.addEventListener('click', () => {
             modal.classList.add('active');
             editUsername.value = profileUsername.textContent;
             editBio.value = profileBio.textContent === 'О себе...' ? '' : profileBio.textContent;
         });
 
+        // Закрытие модального окна
         modalClose.addEventListener('click', () => {
             modal.classList.remove('active');
         });
 
+        // Сохранение профиля
         saveButton.addEventListener('click', async () => {
             const newUsername = editUsername.value.trim();
             const newBio = editBio.value.trim();
@@ -621,9 +648,8 @@
                         username: newUsername,
                         bio: newBio || 'О себе...'
                     }, { merge: true });
-                    cachedProfile.username = newUsername;
-                    cachedProfile.bio = newBio || 'О себе...';
-                    updateProfileUI(cachedProfile);
+                    profileUsername.textContent = newUsername;
+                    profileBio.textContent = newBio || 'О себе...';
                     modal.classList.remove('active');
                 } catch (error) {
                     alert('Ошибка сохранения профиля!');
@@ -635,6 +661,7 @@
             }
         });
 
+        // Заглушки для кнопок настроек и избранного
         settingsButton.addEventListener('click', () => {
             alert('Настройки пока не реализованы!');
         });
@@ -643,11 +670,11 @@
             alert('Избранное пока не реализовано!');
         });
 
+        // Выход из аккаунта
         logoutButton.addEventListener('click', async () => {
             loadingOverlay.classList.add('active');
             try {
                 await signOut(auth);
-                cachedProfile = null;
                 window.location.href = 'auth.html';
             } catch (error) {
                 alert('Ошибка при выходе!');
@@ -656,6 +683,7 @@
             loadingOverlay.classList.remove('active');
         });
 
+        // Навигация
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 navItems.forEach(i => i.classList.remove('active'));
@@ -667,15 +695,6 @@
                     alert('Переход на страницу лидеров (заглушка)!');
                 }
             });
-        });
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                await loadProfile();
-            } else {
-                window.location.href = 'auth.html';
-            }
         });
     </script>
 </body>
