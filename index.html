@@ -302,10 +302,19 @@
             background: #1a1a2a;
             border: 1px solid #444455;
         }
+        .post-username-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
         .post-username {
             font-size: 14px;
             font-weight: 600;
             color: #c9d1d9;
+        }
+        .post-verified {
+            width: 16px;
+            height: 16px;
         }
         .post-time {
             font-size: 11px;
@@ -610,7 +619,7 @@
         </div>
     </div>
     <script type="module">
-        import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy, updateDoc } from './database.js';
+        import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy, updateDoc, onSnapshot } from './database.js';
 
         const searchInput = document.querySelector('.search-input');
         const notFoundCard = document.querySelector('.not-found-card');
@@ -630,6 +639,7 @@
 
         const IMGUR_CLIENT_ID = '8ea63c636bd153e';
         let currentUser = null;
+        let userInteractions = new Map();
 
         async function loadPosts() {
             content.innerHTML = '';
@@ -643,6 +653,24 @@
                 const userData = userDoc.data();
                 renderPost(postData, userData, postId);
             }
+        }
+
+        function listenForNewPosts() {
+            const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+            onSnapshot(postsQuery, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const postData = change.doc.data();
+                        const postId = change.doc.id;
+                        if (postData.uid === currentUser.uid) {
+                            getDoc(doc(db, 'users', postData.uid)).then(userDoc => {
+                                const userData = userDoc.data();
+                                renderPost(postData, userData, postId, true);
+                            });
+                        }
+                    }
+                });
+            });
         }
 
         function updatePostTimes() {
@@ -668,7 +696,6 @@
         }
 
         setInterval(updatePostTimes, 1000);
-        setInterval(loadPosts, 10000);
 
         searchInput.addEventListener('input', () => {
             const searchTerm = searchInput.value.trim().toLowerCase();
@@ -826,7 +853,6 @@
                     await addDoc(collection(db, 'posts'), postData);
                     modal.classList.remove('active');
                     resetModal();
-                    await loadPosts();
                 } catch (error) {
                     alert('Ошибка публикации поста!');
                     console.error(error);
@@ -846,45 +872,77 @@
         }
 
         async function handleLike(postId, likeAction, dislikeAction, likeCount, dislikeCount) {
-            if (!likeAction.classList.contains('active')) {
-                const postRef = doc(db, 'posts', postId);
-                await updateDoc(postRef, {
-                    likes: parseInt(likeCount.textContent) + 1
-                });
+            const interaction = userInteractions.get(postId) || { liked: false, disliked: false };
+            
+            if (!interaction.liked) {
                 likeCount.textContent = parseInt(likeCount.textContent) + 1;
                 likeAction.classList.add('active');
-                if (dislikeAction.classList.contains('active')) {
-                    await updateDoc(postRef, {
-                        dislikes: parseInt(dislikeCount.textContent) - 1
-                    });
+                
+                if (interaction.disliked) {
                     dislikeCount.textContent = parseInt(dislikeCount.textContent) - 1;
                     dislikeAction.classList.remove('active');
+                    interaction.disliked = false;
+                }
+                
+                interaction.liked = true;
+                userInteractions.set(postId, interaction);
+                
+                try {
+                    const postRef = doc(db, 'posts', postId);
+                    await updateDoc(postRef, {
+                        likes: parseInt(likeCount.textContent),
+                        ...(interaction.disliked ? { dislikes: parseInt(dislikeCount.textContent) } : {})
+                    });
+                } catch (error) {
+                    console.error('Error updating like:', error);
+                    likeCount.textContent = parseInt(likeCount.textContent) - 1;
+                    likeAction.classList.remove('active');
+                    interaction.liked = false;
+                    userInteractions.set(postId, interaction);
                 }
             }
         }
 
         async function handleDislike(postId, dislikeAction, likeAction, dislikeCount, likeCount) {
-            if (!dislikeAction.classList.contains('active')) {
-                const postRef = doc(db, 'posts', postId);
-                await updateDoc(postRef, {
-                    dislikes: parseInt(dislikeCount.textContent) + 1
-                });
+            const interaction = userInteractions.get(postId) || { liked: false, disliked: false };
+            
+            if (!interaction.disliked) {
                 dislikeCount.textContent = parseInt(dislikeCount.textContent) + 1;
                 dislikeAction.classList.add('active');
-                if (likeAction.classList.contains('active')) {
-                    await updateDoc(postRef, {
-                        likes: parseInt(likeCount.textContent) - 1
-                    });
+                
+                if (interaction.liked) {
                     likeCount.textContent = parseInt(likeCount.textContent) - 1;
                     likeAction.classList.remove('active');
+                    interaction.liked = false;
+                }
+                
+                interaction.disliked = true;
+                userInteractions.set(postId, interaction);
+                
+                try {
+                    const postRef = doc(db, 'posts', postId);
+                    await updateDoc(postRef, {
+                        dislikes: parseInt(dislikeCount.textContent),
+                        ...(interaction.liked ? { likes: parseInt(likeCount.textContent) } : {})
+                    });
+                } catch (error) {
+                    console.error('Error updating dislike:', error);
+                    dislikeCount.textContent = parseInt(dislikeCount.textContent) - 1;
+                    dislikeAction.classList.remove('active');
+                    interaction.disliked = false;
+                    userInteractions.set(postId, interaction);
                 }
             }
         }
 
-        function renderPost(postData, userData, postId) {
+        function renderPost(postData, userData, postId, prepend = false) {
+            const existingPost = document.querySelector(`.post[data-id="${postId}"]`);
+            if (existingPost) return;
+
             const post = document.createElement('div');
             post.classList.add('post');
             post.dataset.createdAt = postData.createdAt;
+            post.dataset.id = postId;
 
             const postHeader = document.createElement('div');
             postHeader.classList.add('post-header');
@@ -896,10 +954,23 @@
             postHeader.appendChild(postAvatar);
 
             const headerInfo = document.createElement('div');
+            const postUsernameContainer = document.createElement('div');
+            postUsernameContainer.classList.add('post-username-container');
+            
             const postUsernameElement = document.createElement('div');
             postUsernameElement.classList.add('post-username');
             postUsernameElement.textContent = userData.username || 'Guest';
-            headerInfo.appendChild(postUsernameElement);
+            postUsernameContainer.appendChild(postUsernameElement);
+
+            if (userData.verify) {
+                const verifiedIcon = document.createElement('img');
+                verifiedIcon.classList.add('post-verified');
+                verifiedIcon.src = 'https://img.icons8.com/color/48/instagram-verification-badge.png';
+                verifiedIcon.alt = 'verified';
+                postUsernameContainer.appendChild(verifiedIcon);
+            }
+
+            headerInfo.appendChild(postUsernameContainer);
 
             const postTime = document.createElement('div');
             postTime.classList.add('post-time');
@@ -981,13 +1052,18 @@
                 alert('Комментарии пока не реализованы!');
             });
 
-            content.appendChild(post);
+            if (prepend) {
+                content.prepend(post);
+            } else {
+                content.appendChild(post);
+            }
         }
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 await loadPosts();
+                listenForNewPosts();
             } else {
                 window.location.href = 'auth.html';
             }
