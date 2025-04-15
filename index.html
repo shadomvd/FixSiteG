@@ -498,7 +498,7 @@
         .image-upload.has-image p {
             display: none;
         }
-        .image-upload.has-image .image-preview {
+        .schedule-upload.has-image .image-preview {
             display: block;
         }
         .publish-button {
@@ -646,12 +646,13 @@
             content.innerHTML = '';
             const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
             const querySnapshot = await getDocs(postsQuery);
-            querySnapshot.forEach(async (doc) => {
-                const postData = doc.data();
-                const userDoc = await getDoc(doc(db, 'users', postData.uid));
+            for (const postDoc of querySnapshot.docs) {
+                const postData = postDoc.data();
+                const userRef = doc(db, 'users', postData.uid);
+                const userDoc = await getDoc(userRef);
                 const userData = userDoc.data();
                 renderPost(postData, userData);
-            });
+            }
         }
 
         function updatePostTimes() {
