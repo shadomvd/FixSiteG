@@ -127,9 +127,39 @@
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
             letter-spacing: 0.2px;
         }
-        .profile-verified {
+        .badge-icon {
             width: 14px;
             height: 14px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .badge-icon:hover {
+            transform: scale(1.1);
+        }
+        .badge-tooltip {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(145deg, #333344, #222233);
+            color: #ffffff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .badge-icon:hover + .badge-tooltip,
+        .badge-icon:active + .badge-tooltip,
+        .badge-icon.show-tooltip + .badge-tooltip {
+            display: block;
+            opacity: 1;
+            transform: translateX(-50%) translateY(4px);
         }
         .profile-bio {
             font-size: 12px;
@@ -417,77 +447,32 @@
         .nav-item.active img {
             filter: brightness(1);
         }
-
         @media (min-width: 481px) and (max-width: 767px) {
-            .container {
-                max-width: 90%;
-            }
-            .nav-bar {
-                max-width: 100%;
-            }
-            .profile-section {
-                max-width: 100%;
-            }
-            .settings-section {
-                max-width: 100%;
-            }
-            .navigation {
-                max-width: 90%;
-            }
-            .profile-username-container {
-                max-width: 260px;
-            }
-            .profile-bio {
-                max-width: 300px;
-            }
+            .container { max-width: 90%; }
+            .nav-bar { max-width: 100%; }
+            .profile-section { max-width: 100%; }
+            .settings-section { max-width: 100%; }
+            .navigation { max-width: 90%; }
+            .profile-username-container { max-width: 260px; }
+            .profile-bio { max-width: 300px; }
         }
-
         @media (min-width: 768px) and (max-width: 1023px) {
-            .container {
-                max-width: 700px;
-            }
-            .nav-bar {
-                max-width: 100%;
-            }
-            .profile-section {
-                max-width: 100%;
-            }
-            .settings-section {
-                max-width: 100%;
-            }
-            .navigation {
-                max-width: 700px;
-            }
-            .profile-username-container {
-                max-width: 300px;
-            }
-            .profile-bio {
-                max-width: 340px;
-            }
+            .container { max-width: 700px; }
+            .nav-bar { max-width: 100%; }
+            .profile-section { max-width: 100%; }
+            .settings-section { max-width: 100%; }
+            .navigation { max-width: 700px; }
+            .profile-username-container { max-width: 300px; }
+            .profile-bio { max-width: 340px; }
         }
-
         @media (min-width: 1024px) {
-            .container {
-                max-width: 900px;
-            }
-            .nav-bar {
-                max-width: 100%;
-            }
-            .profile-section {
-                max-width: 100%;
-            }
-            .settings-section {
-                max-width: 100%;
-            }
-            .navigation {
-                max-width: 900px;
-            }
-            .profile-username-container {
-                max-width: 340px;
-            }
-            .profile-bio {
-                max-width: 380px;
-            }
+            .container { max-width: 900px; }
+            .nav-bar { max-width: 100%; }
+            .profile-section { max-width: 100%; }
+            .settings-section { max-width: 100%; }
+            .navigation { max-width: 900px; }
+            .profile-username-container { max-width: 340px; }
+            .profile-bio { max-width: 380px; }
         }
     </style>
 </head>
@@ -497,18 +482,15 @@
     </div>
     <div class="container">
         <div class="nav-bar">
-            <div class="nav-bar-title">
-                Профиль
-            </div>
+            <div class="nav-bar-title">Профиль</div>
         </div>
         <div class="content">
             <div class="profile-section">
                 <img class="profile-avatar" id="profile-avatar" src="https://img.icons8.com/ios/50/ffffff/user.png" alt="avatar"/>
                 <input type="file" id="avatar-upload" class="avatar-upload" accept="image/*">
                 <div class="profile-username-container">
-                    <div class="profile-username-wrapper">
+                    <div class="profile-username-wrapper" id="profile-username-wrapper">
                         <div class="profile-username" id="profile-username">Guest</div>
-                        <img class="profile-verified" id="profile-verified" src="https://img.icons8.com/color/48/instagram-verification-badge.png" alt="verified" style="display: none;"/>
                     </div>
                     <div class="profile-bio" id="profile-bio">О себе...</div>
                 </div>
@@ -532,10 +514,6 @@
                 <button class="settings-button" id="settings-button">
                     <img src="https://img.icons8.com/ios/50/ffffff/settings.png" alt="settings"/>
                     Настройки
-                </button>
-                <button class="settings-button" id="favorites-button">
-                    <img src="https://img.icons8.com/ios/50/ffffff/bookmark-ribbon.png" alt="favorites"/>
-                    Избранное
                 </button>
                 <button class="settings-button" id="logout-button">
                     <img src="https://img.icons8.com/ios/50/ffffff/exit.png" alt="logout"/>
@@ -562,27 +540,25 @@
         <div class="modal-content">
             <img class="modal-close" id="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
             <h2>Редактировать профиль</h2>
-            <input type="text" id="edit-username" placeholder="Логин (макс. 16 символов)" maxlength="16">
-            <textarea id="edit-bio" placeholder="О себе (макс. 100 символов)" maxlength="100"></textarea>
+            <input type="text" id="edit-username" placeholder="Имя пользователя" maxlength="20">
+            <textarea id="edit-bio" placeholder="О себе..." maxlength="100"></textarea>
             <button class="save-button" id="save-button">Сохранить</button>
         </div>
     </div>
     <script type="module">
-        import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, signOut } from './database.js';
+        import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, signOut, onSnapshot } from './database.js';
 
         const profileAvatar = document.querySelector('#profile-avatar');
         const avatarUpload = document.querySelector('#avatar-upload');
         const profileUsername = document.querySelector('#profile-username');
-        const profileVerified = document.querySelector('#profile-verified');
         const profileBio = document.querySelector('#profile-bio');
         const statSubscriptions = document.querySelector('#stat-subscriptions');
         const statSubscribers = document.querySelector('#stat-subscribers');
         const statFriends = document.querySelector('#stat-friends');
         const editProfileButton = document.querySelector('#edit-profile-button');
         const settingsButton = document.querySelector('#settings-button');
-        const favoritesButton = document.querySelector('#favorites-button');
         const logoutButton = document.querySelector('#logout-button');
-        const modal = document.querySelector('#edit-modal');
+        const editModal = document.querySelector('#edit-modal');
         const modalClose = document.querySelector('#modal-close');
         const editUsername = document.querySelector('#edit-username');
         const editBio = document.querySelector('#edit-bio');
@@ -593,6 +569,11 @@
         const IMGUR_CLIENT_ID = '8ea63c636bd153e';
         let currentUser = null;
         let userDataCache = null;
+
+        if (!db || !onSnapshot) {
+            console.error('Firebase Firestore не инициализирован');
+            alert('Ошибка загрузки Firebase. Попробуйте позже.');
+        }
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -613,7 +594,12 @@
         });
 
         async function loadProfile() {
-            await fetchProfileData();
+            try {
+                await fetchProfileData();
+            } catch (error) {
+                console.error('Ошибка загрузки профиля:', error);
+                throw error;
+            }
         }
 
         async function fetchProfileData() {
@@ -627,7 +613,8 @@
                     subscriptions: 0,
                     subscribers: 0,
                     friends: 0,
-                    verify: false
+                    verify: false,
+                    badges: []
                 };
 
                 userDataCache = defaultData;
@@ -646,20 +633,6 @@
             }
         }
 
-        function listenForProfileUpdates() {
-            const userDocRef = doc(db, 'users', currentUser.uid);
-            onSnapshot(userDocRef, (doc) => {
-                if (doc.exists()) {
-                    userDataCache = doc.data();
-                    updateProfileUI(userDataCache);
-                    const cacheKey = `userData_${currentUser.uid}`;
-                    localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
-                }
-            }, (error) => {
-                console.error('Ошибка подписки на обновления профиля:', error);
-            });
-        }
-
         function updateProfileUI(userData) {
             profileUsername.textContent = userData.username || 'Guest';
             profileBio.textContent = userData.bio || 'О себе...';
@@ -667,8 +640,94 @@
             statSubscriptions.textContent = userData.subscriptions || 0;
             statSubscribers.textContent = userData.subscribers || 0;
             statFriends.textContent = userData.friends || 0;
-            profileVerified.style.display = userData.verify ? 'block' : 'none';
+
+            const wrapper = document.querySelector('#profile-username-wrapper');
+            wrapper.innerHTML = `<div class="profile-username" id="profile-username">${userData.username || 'Guest'}</div>`;
+
+            const badges = userData.badges || [];
+            badges.forEach(badge => {
+                let iconSrc, tooltipText;
+                switch (badge.type) {
+                    case 'verified':
+                        iconSrc = 'https://img.icons8.com/color/48/instagram-verification-badge.png';
+                        tooltipText = badge.reason || 'Популярный пользователь';
+                        break;
+                    case 'nitro':
+                        iconSrc = 'https://i.imgur.com/nitro-icon.png'; // Замените на реальный URL
+                        tooltipText = badge.reason || 'Помощь администрации';
+                        break;
+                    case 'boost':
+                        iconSrc = 'https://i.imgur.com/boost-icon.png'; // Замените на реальный URL
+                        tooltipText = badge.reason || 'Реклама проекта';
+                        break;
+                    default:
+                        return;
+                }
+
+                const badgeIcon = document.createElement('img');
+                badgeIcon.classList.add('badge-icon');
+                badgeIcon.src = iconSrc;
+                badgeIcon.alt = badge.type;
+
+                const badgeTooltip = document.createElement('span');
+                badgeTooltip.classList.add('badge-tooltip');
+                badgeTooltip.textContent = tooltipText;
+
+                wrapper.appendChild(badgeIcon);
+                wrapper.appendChild(badgeTooltip);
+
+                badgeIcon.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    badgeIcon.classList.add('show-tooltip');
+                    setTimeout(() => {
+                        badgeIcon.classList.remove('show-tooltip');
+                    }, 2000);
+                }, { passive: false });
+            });
         }
+
+        function listenForProfileUpdates() {
+            try {
+                const userDocRef = doc(db, 'users', currentUser.uid);
+                onSnapshot(userDocRef, (doc) => {
+                    if (doc.exists()) {
+                        userDataCache = doc.data();
+                        updateProfileUI(userDataCache);
+                        const cacheKey = `userData_${currentUser.uid}`;
+                        localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
+                    }
+                }, (error) => {
+                    console.error('Ошибка подписки на обновления профиля:', error);
+                });
+            } catch (error) {
+                console.error('Ошибка настройки подписки на профиль:', error);
+            }
+        }
+
+        profileAvatar.addEventListener('click', () => {
+            avatarUpload.click();
+        });
+
+        avatarUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                loadingOverlay.classList.add('active');
+                try {
+                    const imageUrl = await uploadToImgur(file);
+                    const userDocRef = doc(db, 'users', currentUser.uid);
+                    await updateDoc(userDocRef, { avatar: imageUrl });
+                    profileAvatar.src = imageUrl;
+                    userDataCache.avatar = imageUrl;
+                    const cacheKey = `userData_${currentUser.uid}`;
+                    localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
+                } catch (error) {
+                    console.error('Ошибка загрузки аватара:', error);
+                    alert('Ошибка загрузки аватара!');
+                } finally {
+                    loadingOverlay.classList.remove('active');
+                }
+            }
+        });
 
         async function uploadToImgur(file) {
             const formData = new FormData();
@@ -696,40 +755,14 @@
             }
         }
 
-        profileAvatar.addEventListener('click', () => {
-            avatarUpload.click();
-        });
-
-        avatarUpload.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                loadingOverlay.classList.add('active');
-                try {
-                    const imageUrl = await uploadToImgur(file);
-                    const userDocRef = doc(db, 'users', currentUser.uid);
-                    await updateDoc(userDocRef, { avatar: imageUrl });
-                    userDataCache.avatar = imageUrl;
-                    updateProfileUI(userDataCache);
-                    const cacheKey = `userData_${currentUser.uid}`;
-                    localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
-                    localStorage.removeItem(`posts_${currentUser.uid}`); // Очистка кэша постов
-                } catch (error) {
-                    console.error('Ошибка загрузки аватара:', error);
-                    alert('Не удалось загрузить аватар.');
-                } finally {
-                    loadingOverlay.classList.remove('active');
-                }
-            }
-        });
-
         editProfileButton.addEventListener('click', () => {
             editUsername.value = userDataCache.username || '';
             editBio.value = userDataCache.bio || '';
-            modal.classList.add('active');
+            editModal.classList.add('active');
         });
 
         modalClose.addEventListener('click', () => {
-            modal.classList.remove('active');
+            editModal.classList.remove('active');
         });
 
         saveButton.addEventListener('click', async () => {
@@ -737,7 +770,7 @@
             const newBio = editBio.value.trim();
 
             if (!newUsername) {
-                alert('Логин не может быть пустым!');
+                alert('Имя пользователя не может быть пустым!');
                 return;
             }
 
@@ -749,16 +782,10 @@
                     bio: newBio || 'О себе...'
                 };
                 await updateDoc(userDocRef, updates);
-                userDataCache.username = newUsername;
-                userDataCache.bio = newBio || 'О себе...';
-                updateProfileUI(userDataCache);
-                const cacheKey = `userData_${currentUser.uid}`;
-                localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
-                localStorage.removeItem(`posts_${currentUser.uid}`); // Очистка кэша постов
-                modal.classList.remove('active');
+                editModal.classList.remove('active');
             } catch (error) {
                 console.error('Ошибка сохранения профиля:', error);
-                alert('Не удалось сохранить изменения.');
+                alert('Ошибка сохранения профиля!');
             } finally {
                 loadingOverlay.classList.remove('active');
             }
@@ -768,18 +795,14 @@
             alert('Настройки пока не реализованы!');
         });
 
-        favoritesButton.addEventListener('click', () => {
-            alert('Избранное пока не реализовано!');
-        });
-
         logoutButton.addEventListener('click', async () => {
             try {
                 await signOut(auth);
-                localStorage.clear(); // Очистка всего кэша при выходе
+                localStorage.removeItem(`userData_${currentUser.uid}`);
                 window.location.href = 'auth.html';
             } catch (error) {
                 console.error('Ошибка выхода:', error);
-                alert('Не удалось выйти.');
+                alert('Ошибка выхода!');
             }
         });
 
