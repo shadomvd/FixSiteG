@@ -18,7 +18,8 @@ import {
     getDocs, 
     query, 
     orderBy, 
-    onSnapshot 
+    onSnapshot, 
+    where 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Конфигурация Firebase
@@ -32,18 +33,11 @@ const firebaseConfig = {
 };
 
 // Инициализация Firebase
-let app, auth, db;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-try {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-} catch (error) {
-    console.error("Ошибка инициализации Firebase:", error);
-    throw error;
-}
-
-// Экспорт всех необходимых функций и объектов
+// Экспорт необходимых функций и объектов
 export { 
     auth, 
     db, 
@@ -58,8 +52,8 @@ export {
     collection, 
     addDoc, 
     getDocs, 
-    query,
-    where,
+    query, 
     orderBy, 
-    onSnapshot 
+    onSnapshot,
+    where 
 };
