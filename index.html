@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FixSite - Профиль</title>
+    <title>FixSite - Соцсеть</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -68,300 +68,150 @@
             gap: 6px;
             position: relative;
         }
-        .profile-section {
-            background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
-            padding: 16px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 6px rgba(100, 100, 255, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid rgba(100, 100, 150, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        .profile-section::before {
-            content: '';
+        .nav-bar img.plus-icon {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 20%, rgba(100, 100, 255, 0.2), transparent 70%);
-            opacity: 0.3;
-            z-index: 0;
-        }
-        .profile-avatar {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: #1a1a2a;
-            border: 2px solid #6464ff;
+            right: 12px;
+            width: 22px;
+            height: 22px;
             cursor: pointer;
-            z-index: 1;
+            transition: transform 0.2s, filter 0.2s;
+            filter: brightness(1);
         }
-        .avatar-upload {
+        .nav-bar img.plus-icon:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2) drop-shadow(0 0 8px rgba(100, 100, 255, 0.5));
+        }
+        .nav-bar img.plus-icon:active {
+            animation: spinAndGlow 0.6s ease forwards;
+        }
+        @keyframes spinAndGlow {
+            0% {
+                transform: scale(1) rotate(0deg);
+                filter: brightness(1) drop-shadow(0 0 0 rgba(100, 100, 255, 0));
+            }
+            50% {
+                transform: scale(1.3) rotate(180deg);
+                filter: brightness(1.5) drop-shadow(0 0 12px rgba(100, 100, 255, 0.8));
+            }
+            100% {
+                transform: scale(1) rotate(360deg);
+                filter: brightness(1) drop-shadow(0 0 0 rgba(100, 100, 255, 0));
+            }
+        }
+        .verified-icon {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .verified-icon:hover {
+            transform: scale(1.1);
+        }
+        .verified-tooltip {
             display: none;
-        }
-        .profile-username-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            z-index: 1;
-            width: 100%;
-            max-width: 220px;
-        }
-        .profile-username-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .profile-username {
-            font-size: 16px;
-            font-weight: 600;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(145deg, #333344, #222233);
             color: #ffffff;
-            text-align: center;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-            letter-spacing: 0.2px;
-        }
-        .profile-verified {
-            width: 14px;
-            height: 14px;
-        }
-        .profile-bio {
-            font-size: 12px;
-            font-weight: 400;
-            color: #c9d1d9;
-            text-align: center;
-            max-width: 100%;
-            word-wrap: break-word;
-            z-index: 1;
-            background: rgba(50, 50, 100, 0.2);
-            padding: 6px 10px;
+            padding: 5px 10px;
             border-radius: 6px;
-            border: 1px solid rgba(100, 100, 150, 0.3);
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .verified-icon:hover + .verified-tooltip,
+        .verified-icon:active + .verified-tooltip,
+        .verified-icon.show-tooltip + .verified-tooltip {
+            display: block;
+            opacity: 1;
+            transform: translateX(-50%) translateY(4px);
+        }
+        .search-container {
+            position: relative;
             width: 100%;
             max-width: 260px;
-            line-height: 1.2;
+            margin: 0 auto 16px;
         }
-        .profile-stats {
-            display: flex;
-            justify-content: space-around;
+        .search-input {
             width: 100%;
-            padding: 8px 0;
-            border-top: 1px solid rgba(100, 100, 150, 0.3);
-            border-bottom: 1px solid rgba(100, 100, 150, 0.3);
-            z-index: 1;
-        }
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-        }
-        .stat-number {
-            font-size: 14px;
-            font-weight: 600;
-            color: #6464ff;
-        }
-        .stat-label {
-            font-size: 10px;
-            font-weight: 400;
-            color: #8b949e;
-        }
-        .edit-profile-button {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 14px;
-            height: 14px;
-            cursor: pointer;
-            filter: brightness(0.8);
-            z-index: 2;
-        }
-        .settings-section {
-            background: linear-gradient(145deg, #222233, #1a1a2a);
-            padding: 14px;
+            padding: 10px 36px 10px 14px;
             border-radius: 8px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            border: 0.5px solid rgba(100, 100, 150, 0.2);
-            margin-bottom: 20px;
-        }
-        .settings-button {
-            width: 96%;
-            margin: 0 auto;
-            padding: 10px;
+            border: 1px solid #444455;
             background: linear-gradient(145deg, #333344, #222233);
-            border: none;
-            border-radius: 6px;
-            color: #c9d1d9;
             font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-            transition: background 0.2s, transform 0.2s, box-shadow 0.2s, color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            outline: none;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            user-select: auto;
         }
-        .settings-button img {
+        .search-input:focus {
+            border-color: #6464ff;
+            box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
+            transform: scale(1.02);
+        }
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
             width: 18px;
             height: 18px;
             filter: brightness(0.8);
             transition: filter 0.2s;
         }
-        .settings-button:hover {
-            background: linear-gradient(145deg, #3a3a4a, #2a2a3a);
-            color: #ffffff;
-            transform: scale(1.02);
-            box-shadow: 0 3px 10px rgba(100, 100, 255, 0.3);
-        }
-        .settings-button:hover img {
+        .search-input:focus + .search-icon {
             filter: brightness(1);
         }
-        .settings-button:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-        }
-        .modal {
+        .not-found-card {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 200;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .modal.active {
-            display: flex;
-            opacity: 1;
-        }
-        .modal-content {
-            background: linear-gradient(145deg, #222233, #1a1a2a);
-            padding: 16px;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 360px;
-            box-shadow: 0 3px 16px rgba(0, 0, 0, 0.6);
-            position: relative;
-            border: 1px solid #303044;
-            transform: scale(0.9);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        .modal.active .modal-content {
-            transform: scale(1);
-            opacity: 1;
-        }
-        .modal-close {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            filter: brightness(0.8);
-            transition: filter 0.2s, transform 0.2s;
-        }
-        .modal-close:hover {
-            filter: brightness(1);
-            transform: rotate(90deg);
-        }
-        .modal-content h2 {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 12px;
             text-align: center;
-            color: #c9d1d9;
-            animation: fadeInElement 0.5s ease forwards;
+            padding: 16px;
+            background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 0 auto 16px;
+            width: 85%;
+            opacity: 0;
+            animation: slideIn 0.4s ease forwards;
+            border: 1px solid rgba(100, 100, 150, 0.2);
         }
-        .modal-content input,
-        .modal-content textarea {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            border: 1px solid #303044;
-            background: #1a1a2a;
-            color: #c9d1d9;
-            font-size: 13px;
-            outline: none;
-            resize: none;
-            user-select: auto;
-            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.4);
-            transition: border-color 0.2s, box-shadow 0.2s;
-            animation: fadeInElement 0.5s ease forwards;
+        .not-found-card.active {
+            display: block;
+            opacity: 1;
         }
-        .modal-content input:focus,
-        .modal-content textarea:focus {
-            border-color: #6464ff;
-            box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
+        .not-found-card img {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 8px;
+            filter: brightness(1);
         }
-        .save-button {
-            width: 100%;
-            padding: 8px;
-            background: linear-gradient(145deg, #6464ff, #4b4bff);
-            border: none;
-            border-radius: 6px;
-            color: #ffffff;
-            font-size: 13px;
+        .not-found-card p {
+            font-size: 14px;
             font-weight: 500;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(100, 100, 255, 0.4);
-            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-            animation: fadeInElement 0.5s ease forwards;
+            color: #aaaaaa;
         }
-        .save-button:hover {
-            background: linear-gradient(145deg, #5a5aff, #4141ff);
-            transform: scale(1.02);
-            box-shadow: 0 3px 12px rgba(100, 100, 255, 0.5);
-        }
-        .save-button:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 8px rgba(100, 100, 255, 0.4);
-        }
-        @keyframes fadeInElement {
-            from { opacity: 0; transform: translateY(10px); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 300;
-            justify-content: center;
-            align-items: center;
-        }
-        .loading-overlay.active {
-            display: flex;
-        }
-        .loader {
-            border: 4px solid #6464ff;
-            border-top: 4px solid transparent;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes immerseIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.95);
+                filter: blur(4px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
         }
         .navigation {
             position: fixed;
@@ -509,86 +359,301 @@
             height: 18px;
             filter: brightness(0.7);
         }
-        @keyframes immerseIn {
-            0% {
-                opacity: 0;
-                transform: translateY(-50px) scale(0.95);
-                filter: blur(4px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0);
-            }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
-        @media (min-width: 481px) and (max-width: 767px) {
-            .container {
-                max-width: 90%;
-            }
-            .nav-bar {
-                max-width: 100%;
-            }
-            .profile-section {
-                max-width: 100%;
-            }
-            .settings-section {
-                max-width: 100%;
-            }
-            .navigation {
-                max-width: 90%;
-            }
-            .profile-username-container {
-                max-width: 260px;
-            }
-            .profile-bio {
-                max-width: 300px;
-            }
+        .modal.active {
+            display: flex;
+            opacity: 1;
         }
-        @media (min-width: 768px) and (max-width: 1023px) {
-            .container {
-                max-width: 700px;
-            }
-            .nav-bar {
-                max-width: 100%;
-            }
-            .profile-section {
-                max-width: 100%;
-            }
-            .settings-section {
-                max-width: 100%;
-            }
-            .navigation {
-                max-width: 700px;
-            }
-            .profile-username-container {
-                max-width: 300px;
-            }
-            .profile-bio {
-                max-width: 340px;
-            }
+        .modal-content {
+            background: linear-gradient(145deg, #222233, #1a1a2a);
+            padding: 16px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 360px;
+            box-shadow: 0 3px 16px rgba(0, 0, 0, 0.6);
+            position: relative;
+            border: 1px solid #303044;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        @media (min-width: 1024px) {
-            .container {
-                max-width: 900px;
-            }
-            .nav-bar {
-                max-width: 100%;
-            }
-            .profile-section {
-                max-width: 100%;
-            }
-            .settings-section {
-                max-width: 100%;
-            }
-            .navigation {
-                max-width: 900px;
-            }
-            .profile-username-container {
-                max-width: 340px;
-            }
-            .profile-bio {
-                max-width: 380px;
-            }
+        .modal.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .modal-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            filter: brightness(0.8);
+            transition: filter 0.2s, transform 0.2s;
+        }
+        .modal-close:hover {
+            filter: brightness(1);
+            transform: rotate(90deg);
+        }
+        .modal-content h2 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-align: center;
+            color: #c9d1d9;
+            animation: fadeInElement 0.5s ease forwards;
+        }
+        .modal-content input,
+        .modal-content textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border: 1px solid #303044;
+            background: #1a1a2a;
+            color: #c9d1d9;
+            font-size: 13px;
+            outline: none;
+            resize: none;
+            user-select: auto;
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.4);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            animation: fadeInElement 0.5s ease forwards;
+        }
+        .modal-content input:focus,
+        .modal-content textarea:focus {
+            border-color: #6464ff;
+            box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
+        }
+        .image-upload {
+            width: 100%;
+            height: 90px;
+            border: 2px dashed #303044;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: #1a1a2a;
+            transition: border-color 0.2s, background 0.2s;
+            animation: fadeInElement 0.5s ease forwards;
+        }
+        .image-upload:hover {
+            border-color: #6464ff;
+            background: #222233;
+        }
+        .image-upload img.placeholder {
+            width: 32px;
+            height: 32px;
+            filter: brightness(0.7);
+            transition: transform 0.3s ease;
+        }
+        .image-upload:hover img.placeholder {
+            transform: scale(1.1);
+        }
+        .image-upload p {
+            font-size: 11px;
+            color: #8b949e;
+            margin-top: 5px;
+        }
+        .image-upload input[type="file"] {
+            display: none;
+        }
+        .image-preview {
+            display: none;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #1a1a2a;
+        }
+        .image-upload.has-image .placeholder,
+        .image-upload.has-image p {
+            display: none;
+        }
+        .image-upload.has-image .image-preview {
+            display: block;
+        }
+        .publish-button {
+            width: 96%;
+            margin: 0 auto;
+            padding: 8px;
+            background: linear-gradient(145deg, #6464ff, #4b4bff);
+            border: none;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(100, 100, 255, 0.4);
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+            animation: fadeInElement 0.5s ease forwards;
+        }
+        .publish-button:hover {
+            background: linear-gradient(145deg, #5a5aff, #4141ff);
+            transform: scale(1.02);
+            box-shadow: 0 3px 12px rgba(100, 100, 255, 0.5);
+        }
+        .publish-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(100, 100, 255, 0.4);
+        }
+        .avatar-modal-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 50%;
+            background: #1a1a2a;
+            border: 1px solid #303044;
+            margin: 0 auto;
+            display: block;
+        }
+        .post-image-modal {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #1a1a2a;
+            border: 1px solid #303044;
+            margin: 0 auto;
+            display: block;
+        }
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .user-stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            padding: 8px 0;
+            border-top: 1px solid rgba(100, 100, 150, 0.3);
+            border-bottom: 1px solid rgba(100, 100, 150, 0.3);
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .stat-number {
+            font-size: 14px;
+            font-weight: 600;
+            color: #6464ff;
+        }
+        .stat-label {
+            font-size: 10px;
+            font-weight: 400;
+            color: #8b949e;
+        }
+        .username-container {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .user-bio {
+            font-size: 12px;
+            font-weight: 400;
+            color: #c9d1d9;
+            text-align: center;
+            margin-top: 4px;
+            max-width: 90%;
+            word-wrap: break-word;
+            background: rgba(50, 50, 100, 0.2);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(100, 100, 150, 0.3);
+            width: 100%;
+            max-width: 260px;
+            line-height: 1.2;
+        }
+        .cooldown-modal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .cooldown-message {
+            color: #ff5555;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .cooldown-close-button {
+            width: 96%;
+            margin: 0 auto;
+            padding: 8px;
+            background: linear-gradient(145deg, #ff5555, #cc4444);
+            border: none;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255, 85, 85, 0.4);
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+        .cooldown-close-button:hover {
+            background: linear-gradient(145deg, #ff6666, #dd5555);
+            transform: scale(1.02);
+            box-shadow: 0 3px 12px rgba(255, 85, 85, 0.5);
+        }
+        .cooldown-close-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 85, 85, 0.4);
+        }
+        @keyframes fadeInElement {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+        }
+        .loading-overlay.active {
+            display: flex;
+        }
+        .loader {
+            border: 4px solid #6464ff;
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -599,21 +664,61 @@
     <div class="container">
         <div class="nav-bar">
             <div class="nav-bar-title">
-                Профиль
+                FixSite
+                <img class="verified-icon" src="https://img.icons8.com/color/48/instagram-verification-badge.png" alt="verified"/>
+                <span class="verified-tooltip">Проект верифицирован</span>
+            </div>
+            <img class="plus-icon" src="https://img.icons8.com/ios/50/ffffff/plus--v1.png" alt="plus"/>
+        </div>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Поиск...">
+            <img class="search-icon" src="https://img.icons8.com/ios/50/ffffff/search--v1.png" alt="search"/>
+        </div>
+        <div class="not-found-card" id="not-found">
+            <img src="https://img.icons8.com/ios/50/ffffff/sad.png" alt="sad"/>
+            <p>Ничего не найдено</p>
+        </div>
+        <div class="content" id="content"></div>
+        <div class="navigation">
+            <div class="nav-item">
+                <img src="https://img.icons8.com/ios/50/ffffff/leaderboard.png" alt="leaderboard"/>
+                <span class="nav-text">Лидеры</span>
+            </div>
+            <div class="nav-item active">
+                <img src="https://img.icons8.com/ios/50/ffffff/home.png" alt="home"/>
+                <span class="nav-text">Главное</span>
+            </div>
+            <div class="nav-item">
+                <img src="https://img.icons8.com/ios/50/ffffff/user.png" alt="profile"/>
+                <span class="nav-text">Профиль</span>
             </div>
         </div>
-        <div class="content">
-            <div class="profile-section">
-                <img class="profile-avatar" id="profile-avatar" src="https://img.icons8.com/ios/50/ffffff/user.png" alt="avatar"/>
-                <input type="file" id="avatar-upload" class="avatar-upload" accept="image/*">
-                <div class="profile-username-container">
-                    <div class="profile-username-wrapper">
-                        <div class="profile-username" id="profile-username">Guest</div>
-                        <img class="profile-verified" id="profile-verified" src="https://img.icons8.com/color/48/instagram-verification-badge.png" alt="verified" style="display: none;"/>
-                    </div>
-                    <div class="profile-bio" id="profile-bio">О себе...</div>
+    </div>
+    <div class="modal" id="post-modal">
+        <div class="modal-content">
+            <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
+            <h2>Создать новый пост</h2>
+            <input type="text" id="post-title" placeholder="Заголовок (макс. 16 символов)" maxlength="16">
+            <textarea id="post-text" placeholder="Текст (макс. 500 символов)" maxlength="500"></textarea>
+            <div class="image-upload" id="image-upload">
+                <img class="placeholder" src="https://img.icons8.com/ios/50/ffffff/image.png" alt="image-placeholder"/>
+                <p>Перетащите или выберите изображение</p>
+                <input type="file" id="image-input" accept="image/*">
+                <img class="image-preview" id="image-preview" alt="preview"/>
+            </div>
+            <button class="publish-button" id="publish-button">Опубликовать</button>
+        </div>
+    </div>
+    <div class="modal" id="avatar-modal">
+        <div class="modal-content">
+            <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
+            <img id="avatar-modal-image" class="avatar-modal-image" src="" alt="avatar"/>
+            <div class="user-info">
+                <div class="username-container">
+                    <h2 id="avatar-modal-username">Пользователь</h2>
                 </div>
-                <div class="profile-stats">
+                <div class="user-bio" id="avatar-modal-bio"></div>
+                <div class="user-stats">
                     <div class="stat-item">
                         <div class="stat-number" id="stat-subscriptions">0</div>
                         <div class="stat-label">Подписки</div>
@@ -627,98 +732,74 @@
                         <div class="stat-label">Друзья</div>
                     </div>
                 </div>
-                <img class="edit-profile-button" id="edit-profile-button" src="https://img.icons8.com/ios/50/ffffff/edit--v1.png" alt="edit"/>
-            </div>
-            <div class="settings-section">
-                <button class="settings-button" id="settings-button">
-                    <img src="https://img.icons8.com/ios/50/ffffff/settings.png" alt="settings"/>
-                    Настройки
-                </button>
-                <button class="settings-button" id="favorites-button">
-                    <img src="https://img.icons8.com/ios/50/ffffff/star--v1.png" alt="favorites"/>
-                    Избранное
-                </button>
-                <button class="settings-button" id="logout-button">
-                    <img src="https://img.icons8.com/ios/50/ffffff/logout-rounded.png" alt="logout"/>
-                    Выйти
-                </button>
-            </div>
-            <div id="user-posts"></div>
-        </div>
-        <div class="navigation">
-            <div class="nav-item">
-                <img src="https://img.icons8.com/ios/50/ffffff/leaderboard.png" alt="leaderboard"/>
-                <span class="nav-text">Лидеры</span>
-            </div>
-            <div class="nav-item">
-                <img src="https://img.icons8.com/ios/50/ffffff/home.png" alt="home"/>
-                <span class="nav-text">Главное</span>
-            </div>
-            <div class="nav-item active">
-                <img src="https://img.icons8.com/ios/50/ffffff/user.png" alt="profile"/>
-                <span class="nav-text">Профиль</span>
             </div>
         </div>
     </div>
-    <div class="modal" id="edit-profile-modal">
+    <div class="modal" id="image-modal">
         <div class="modal-content">
-            <img class="modal-close" id="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
-            <h2>Редактировать профиль</h2>
-            <input type="text" id="edit-username" placeholder="Имя пользователя (макс. 16 символов)" maxlength="16">
-            <textarea id="edit-bio" placeholder="О себе (макс. 100 символов)" maxlength="100"></textarea>
-            <button class="save-button" id="save-profile">Сохранить</button>
+            <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
+            <img id="post-image-modal" class="post-image-modal" src="" alt="post image"/>
+        </div>
+    </div>
+    <div class="modal" id="cooldown-modal">
+        <div class="modal-content cooldown-modal-content">
+            <p class="cooldown-message" id="cooldown-message">Подождите перед созданием нового поста!</p>
+            <button class="cooldown-close-button" id="cooldown-close-button">Закрыть</button>
         </div>
     </div>
     <script type="module">
-        // Импорт функций Firebase
-        import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, signOut, collection, query, where, orderBy, onSnapshot, getDocs } from './database.js';
+        import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy, onSnapshot } from './database.js';
 
-        // Объявление переменных DOM
-        const profileAvatar = document.querySelector('#profile-avatar');
-        const avatarUpload = document.querySelector('#avatar-upload');
-        const profileUsername = document.querySelector('#profile-username');
-        const profileVerified = document.querySelector('#profile-verified');
-        const profileBio = document.querySelector('#profile-bio');
+        const searchInput = document.querySelector('.search-input');
+        const notFoundCard = document.querySelector('.not-found-card');
+        const navItems = document.querySelectorAll('.nav-item');
+        const verifiedIcon = document.querySelector('.verified-icon');
+        const plusIcon = document.querySelector('.plus-icon');
+        const modal = document.querySelector('#post-modal');
+        const modalClose = document.querySelector('#post-modal .modal-close');
+        const imageUpload = document.querySelector('#image-upload');
+        const imageInput = document.querySelector('#image-input');
+        const imagePreview = document.querySelector('#image-preview');
+        const publishButton = document.querySelector('#publish-button');
+        const postTitle = document.querySelector('#post-title');
+        const postText = document.querySelector('#post-text');
+        const content = document.querySelector('#content');
+        const loadingOverlay = document.querySelector('#loading-overlay');
+        const avatarModal = document.querySelector('#avatar-modal');
+        const avatarModalImage = document.querySelector('#avatar-modal-image');
+        const avatarModalUsername = document.querySelector('#avatar-modal-username');
+        const avatarModalBio = document.querySelector('#avatar-modal-bio');
         const statSubscriptions = document.querySelector('#stat-subscriptions');
         const statSubscribers = document.querySelector('#stat-subscribers');
         const statFriends = document.querySelector('#stat-friends');
-        const editProfileButton = document.querySelector('#edit-profile-button');
-        const settingsButton = document.querySelector('#settings-button');
-        const favoritesButton = document.querySelector('#favorites-button');
-        const logoutButton = document.querySelector('#logout-button');
-        const editProfileModal = document.querySelector('#edit-profile-modal');
-        const modalClose = document.querySelector('#modal-close');
-        const editUsername = document.querySelector('#edit-username');
-        const editBio = document.querySelector('#edit-bio');
-        const saveProfile = document.querySelector('#save-profile');
-        const userPosts = document.querySelector('#user-posts');
-        const loadingOverlay = document.querySelector('#loading-overlay');
-        const navItems = document.querySelectorAll('.nav-item');
+        const avatarModalClose = document.querySelector('#avatar-modal .modal-close');
+        const imageModal = document.querySelector('#image-modal');
+        const postImageModal = document.querySelector('#post-image-modal');
+        const imageModalClose = document.querySelector('#image-modal .modal-close');
+        const cooldownModal = document.querySelector('#cooldown-modal');
+        const cooldownMessage = document.querySelector('#cooldown-message');
+        const cooldownCloseButton = document.querySelector('#cooldown-close-button');
 
         const IMGUR_CLIENT_ID = '8ea63c636bd153e';
         let currentUser = null;
         let unsubscribeSnapshot = null;
+        let lastPostTimestamp = null;
+        const POST_COOLDOWN = 5 * 60 * 1000; // 5 минут в миллисекундах
 
-        // Проверка загрузки Firebase
-        if (!auth || !db || !onSnapshot) {
-            console.error('Firebase не загружен корректно. Проверьте database.js');
-            alert('Ошибка загрузки Firebase. Попробуйте позже.');
-            loadingOverlay.classList.remove('active');
-            window.location.href = 'auth.html'; // Перенаправление вместо return
-        }
-
-        // Отслеживание состояния авторизации
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 loadingOverlay.classList.add('active');
                 try {
-                    await loadProfile();
-                    await loadUserPosts();
-                    listenForUserPosts();
+                    // Очистка старого кэша для синхронизации
+                    localStorage.removeItem(`posts_${currentUser.uid}`);
+                    await loadPosts();
+                    listenForNewPosts();
+                    // Загрузка времени последнего поста
+                    lastPostTimestamp = localStorage.getItem(`lastPost_${currentUser.uid}`) || null;
                 } catch (error) {
-                    console.error('Ошибка загрузки профиля или постов:', error);
-                    alert('Не удалось загрузить данные профиля. Проверьте соединение.');
+                    console.error('Ошибка загрузки постов:', error);
+                    alert('Не удалось загрузить посты. Проверьте настройки Firestore.');
                 } finally {
                     loadingOverlay.classList.remove('active');
                 }
@@ -727,88 +808,89 @@
             }
         });
 
-        // Загрузка профиля пользователя
-        async function loadProfile() {
-            try {
-                const userRef = doc(db, 'users', currentUser.uid);
-                const userDoc = await getDoc(userRef);
-                let userData = {
-                    username: 'Guest',
-                    avatar: 'https://img.icons8.com/ios/50/ffffff/user.png',
-                    bio: 'О себе...',
-                    verify: false,
-                    subscriptions: 0,
-                    subscribers: 0,
-                    friends: 0
-                };
+        async function loadPosts() {
+            const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+            const querySnapshot = await getDocs(postsQuery);
+            const posts = [];
+            const users = {};
 
-                if (userDoc.exists()) {
-                    userData = userDoc.data();
-                } else {
-                    await setDoc(userRef, userData);
+            content.innerHTML = ''; // Очистка контента перед загрузкой
+
+            for (const postDoc of querySnapshot.docs) {
+                const postData = postDoc.data();
+                const postId = postDoc.id;
+                postData.id = postId;
+
+                try {
+                    if (!users[postData.uid]) {
+                        const userRef = doc(db, 'users', postData.uid);
+                        const userDoc = await getDoc(userRef);
+                        users[postData.uid] = userDoc.exists() ? userDoc.data() : { 
+                            username: 'Guest', 
+                            avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', 
+                            verify: false,
+                            bio: '',
+                            subscriptions: 0,
+                            subscribers: 0,
+                            friends: 0
+                        };
+                    }
+                    renderPost(postData, users[postData.uid], postId);
+                    posts.push(postData);
+                } catch (error) {
+                    console.error(`Ошибка загрузки профиля для поста ${postId}:`, error);
                 }
-
-                profileAvatar.src = userData.avatar || userData.avatar;
-                profileUsername.textContent = userData.username || 'Guest';
-                profileBio.textContent = userData.bio || 'О себе...';
-                profileVerified.style.display = userData.verify ? 'block' : 'none';
-                statSubscriptions.textContent = userData.subscriptions || 0;
-                statSubscribers.textContent = userData.subscribers || 0;
-                statFriends.textContent = userData.friends || 0;
-
-                localStorage.setItem(`profile_${currentUser.uid}`, JSON.stringify(userData));
-            } catch (error) {
-                console.error('Ошибка загрузки профиля:', error);
-                throw error;
             }
+
+            localStorage.setItem(`posts_${currentUser.uid}`, JSON.stringify({ posts, users }));
         }
 
-        // Загрузка постов пользователя
-        async function loadUserPosts() {
-            try {
-                const postsQuery = query(collection(db, 'posts'), where('uid', '==', currentUser.uid), orderBy('createdAt', 'desc'));
-                const querySnapshot = await getDocs(postsQuery);
-                userPosts.innerHTML = '';
-
-                for (const postDoc of querySnapshot.docs) {
-                    const postData = postDoc.data();
-                    const postId = postDoc.id;
-                    renderPost(postData, postId);
-                }
-            } catch (error) {
-                console.error('Ошибка загрузки постов пользователя:', error);
-                throw error;
-            }
-        }
-
-        // Подписка на новые посты пользователя
-        function listenForUserPosts() {
+        function listenForNewPosts() {
             if (unsubscribeSnapshot) unsubscribeSnapshot();
 
-            try {
-                const postsQuery = query(collection(db, 'posts'), where('uid', '==', currentUser.uid), orderBy('createdAt', 'desc'));
-                unsubscribeSnapshot = onSnapshot(postsQuery, (snapshot) => {
-                    snapshot.docChanges().forEach((change) => {
-                        if (change.type === 'added') {
-                            const postData = change.doc.data();
-                            const postId = change.doc.id;
-                            const existingPost = document.querySelector(`.post[data-id="${postId}"]`);
-                            if (!existingPost) {
-                                renderPost(postData, postId, true);
+            const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+            unsubscribeSnapshot = onSnapshot(postsQuery, async (snapshot) => {
+                const cachedData = JSON.parse(localStorage.getItem(`posts_${currentUser.uid}`)) || { posts: [], users: {} };
+                const { posts, users } = cachedData;
+
+                for (const change of snapshot.docChanges()) {
+                    if (change.type === 'added') {
+                        const postData = change.doc.data();
+                        const postId = change.doc.id;
+                        postData.id = postId;
+
+                        const existingPost = posts.find(p => p.id === postId);
+                        if (existingPost) continue;
+
+                        try {
+                            if (!users[postData.uid]) {
+                                const userRef = doc(db, 'users', postData.uid);
+                                const userDoc = await getDoc(userRef);
+                                users[postData.uid] = userDoc.exists() ? userDoc.data() : { 
+                                    username: 'Guest', 
+                                    avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', 
+                                    verify: false,
+                                    bio: '',
+                                    subscriptions: 0,
+                                    subscribers: 0,
+                                    friends: 0
+                                };
                             }
+                            renderPost(postData, users[postData.uid], postId, true);
+                            posts.unshift(postData);
+                            localStorage.setItem(`posts_${currentUser.uid}`, JSON.stringify({ posts, users }));
+                        } catch (error) {
+                            console.error(`Ошибка загрузки профиля для нового поста ${postId}:`, error);
                         }
-                    });
-                }, (error) => {
-                    console.error('Ошибка подписки на посты пользователя:', error);
-                });
-            } catch (error) {
-                console.error('Ошибка настройки подписки на посты:', error);
-            }
+                    }
+                }
+            }, (error) => {
+                console.error('Ошибка подписки на новые посты:', error);
+            });
         }
 
-        // Обновление времени постов
         function updatePostTimes() {
-            const posts = userPosts.querySelectorAll('.post');
+            const posts = content.querySelectorAll('.post');
             posts.forEach(post => {
                 const createdAt = post.dataset.createdAt;
                 if (createdAt) {
@@ -834,32 +916,125 @@
 
         setInterval(updatePostTimes, 1000);
 
-        // Загрузка аватара
-        profileAvatar.addEventListener('click', () => {
-            avatarUpload.click();
-        });
+        searchInput.addEventListener('input', () => {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            const posts = content.querySelectorAll('.post');
+            let hasMatches = false;
 
-        avatarUpload.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                loadingOverlay.classList.add('active');
-                try {
-                    const imageUrl = await uploadToImgur(file);
-                    await updateDoc(doc(db, 'users', currentUser.uid), { avatar: imageUrl });
-                    profileAvatar.src = imageUrl;
-                    const cachedProfile = JSON.parse(localStorage.getItem(`profile_${currentUser.uid}`)) || {};
-                    cachedProfile.avatar = imageUrl;
-                    localStorage.setItem(`profile_${currentUser.uid}`, JSON.stringify(cachedProfile));
-                } catch (error) {
-                    console.error('Ошибка загрузки аватара:', error);
-                    alert('Не удалось загрузить аватар!');
-                } finally {
-                    loadingOverlay.classList.remove('active');
+            posts.forEach(post => {
+                const title = post.querySelector('.post-title')?.textContent.toLowerCase() || '';
+                const text = post.querySelector('.post-text')?.textContent.toLowerCase() || '';
+                if (title.includes(searchTerm) || text.includes(searchTerm)) {
+                    post.style.display = 'flex';
+                    hasMatches = true;
+                } else {
+                    post.style.display = 'none';
                 }
+            });
+
+            if (searchTerm === '') {
+                posts.forEach(post => post.style.display = 'flex');
+                notFoundCard.classList.remove('active');
+            } else if (!hasMatches) {
+                notFoundCard.classList.add('active');
+            } else {
+                notFoundCard.classList.remove('active');
             }
         });
 
-        // Загрузка изображения на Imgur
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                const navText = item.querySelector('.nav-text').textContent;
+                if (navText === 'Профиль') {
+                    if (unsubscribeSnapshot) unsubscribeSnapshot();
+                    window.location.href = 'profile.html';
+                } else if (navText === 'Лидеры') {
+                    alert('Переход на страницу лидеров (заглушка)!');
+                }
+            });
+        });
+
+        verifiedIcon.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            verifiedIcon.classList.add('show-tooltip');
+            setTimeout(() => {
+                verifiedIcon.classList.remove('show-tooltip');
+            }, 2000);
+        }, { passive: true });
+
+        verifiedIcon.addEventListener('click', () => {
+            verifiedIcon.classList.toggle('show-tooltip');
+        });
+
+        plusIcon.addEventListener('click', () => {
+            if (lastPostTimestamp && (Date.now() - parseInt(lastPostTimestamp)) < POST_COOLDOWN) {
+                const timeLeft = Math.ceil((POST_COOLDOWN - (Date.now() - parseInt(lastPostTimestamp))) / 1000 / 60);
+                cooldownMessage.textContent = `Подождите ${timeLeft} минут перед созданием нового поста!`;
+                cooldownModal.classList.add('active');
+            } else {
+                modal.classList.add('active');
+            }
+        });
+
+        modalClose.addEventListener('click', () => {
+            modal.classList.remove('active');
+            resetModal();
+        });
+
+        avatarModalClose.addEventListener('click', () => {
+            avatarModal.classList.remove('active');
+        });
+
+        imageModalClose.addEventListener('click', () => {
+            imageModal.classList.remove('active');
+        });
+
+        cooldownCloseButton.addEventListener('click', () => {
+            cooldownModal.classList.remove('active');
+        });
+
+        imageUpload.addEventListener('click', () => {
+            imageInput.click();
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    imagePreview.src = reader.result;
+                    imageUpload.classList.add('has-image');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        imageUpload.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            imageUpload.style.borderColor = '#6464ff';
+        });
+
+        imageUpload.addEventListener('dragleave', () => {
+            imageUpload.style.borderColor = '#303044';
+        });
+
+        imageUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imageUpload.style.borderColor = '#303044';
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    imagePreview.src = reader.result;
+                    imageUpload.classList.add('has-image');
+                };
+                reader.readAsDataURL(file);
+                imageInput.files = e.dataTransfer.files;
+            }
+        });
+
         async function uploadToImgur(file) {
             const formData = new FormData();
             formData.append('image', file);
@@ -881,95 +1056,87 @@
                     throw new Error('Ошибка загрузки изображения в Imgur');
                 }
             } catch (error) {
-                console.error('Ошибка загрузки Imgur:', error);
+                console.error('Imgur upload error:', error);
                 throw error;
             }
         }
 
-        // Открытие модального окна редактирования профиля
-        editProfileButton.addEventListener('click', () => {
-            const cachedProfile = JSON.parse(localStorage.getItem(`profile_${currentUser.uid}`)) || {};
-            editUsername.value = cachedProfile.username || 'Guest';
-            editBio.value = cachedProfile.bio || 'О себе...';
-            editProfileModal.classList.add('active');
-        });
+        publishButton.addEventListener('click', async () => {
+            const title = postTitle.value.trim();
+            const text = postText.value.trim();
+            const file = imageInput.files[0];
 
-        // Закрытие модального окна
-        modalClose.addEventListener('click', () => {
-            editProfileModal.classList.remove('active');
-        });
-
-        // Сохранение профиля
-        saveProfile.addEventListener('click', async () => {
-            const username = editUsername.value.trim();
-            const bio = editBio.value.trim();
-
-            if (!username) {
-                alert('Имя пользователя не может быть пустым!');
+            if (!title && !text && !file) {
+                alert('Добавьте хотя бы заголовок, текст или изображение!');
                 return;
             }
 
             loadingOverlay.classList.add('active');
+            let imageUrl = '';
+
+            if (file) {
+                try {
+                    imageUrl = await uploadToImgur(file);
+                } catch (error) {
+                    alert('Ошибка загрузки изображения!');
+                    loadingOverlay.classList.remove('active');
+                    return;
+                }
+            }
+
+            const postData = {
+                uid: currentUser.uid,
+                title,
+                text,
+                imageUrl,
+                createdAt: Date.now(),
+                comments: 0
+            };
+
             try {
+                const docRef = await addDoc(collection(db, 'posts'), postData);
+                postData.id = docRef.id;
+                modal.classList.remove('active');
+                resetModal();
+
+                const cachedData = JSON.parse(localStorage.getItem(`posts_${currentUser.uid}`)) || { posts: [], users: {} };
                 const userRef = doc(db, 'users', currentUser.uid);
-                const updatedData = { username, bio };
-                await updateDoc(userRef, updatedData);
-
-                profileUsername.textContent = username;
-                profileBio.textContent = bio;
-
-                const cachedProfile = JSON.parse(localStorage.getItem(`profile_${currentUser.uid}`)) || {};
-                cachedProfile.username = username;
-                cachedProfile.bio = bio;
-                localStorage.setItem(`profile_${currentUser.uid}`, JSON.stringify(cachedProfile));
-
-                editProfileModal.classList.remove('active');
+                const userDoc = await getDoc(userRef);
+                const userData = userDoc.exists() ? userDoc.data() : { 
+                    username: 'Guest', 
+                    avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', 
+                    verify: false,
+                    bio: '',
+                    subscriptions: 0,
+                    subscribers: 0,
+                    friends: 0
+                };
+                cachedData.users[currentUser.uid] = userData;
+                cachedData.posts.unshift(postData);
+                localStorage.setItem(`posts_${currentUser.uid}`, JSON.stringify(cachedData));
+                // Сохраняем время публикации поста
+                lastPostTimestamp = Date.now();
+                localStorage.setItem(`lastPost_${currentUser.uid}`, lastPostTimestamp);
             } catch (error) {
-                console.error('Ошибка сохранения профиля:', error);
-                alert('Не удалось сохранить профиль!');
+                console.error('Ошибка публикации поста:', error);
+                alert('Ошибка публикации поста!');
             } finally {
                 loadingOverlay.classList.remove('active');
             }
         });
 
-        // Навигация
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                navItems.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                const navText = item.querySelector('.nav-text').textContent;
-                if (navText === 'Главное') {
-                    if (unsubscribeSnapshot) unsubscribeSnapshot();
-                    window.location.href = 'index.html';
-                } else if (navText === 'Лидеры') {
-                    alert('Переход на страницу лидеров (заглушка)!');
-                }
-            });
-        });
+        function resetModal() {
+            postTitle.value = '';
+            postText.value = '';
+            imageInput.value = '';
+            imageUpload.classList.remove('has-image');
+            imagePreview.src = '';
+        }
 
-        // Обработчики кнопок настроек
-        settingsButton.addEventListener('click', () => {
-            alert('Настройки пока не реализованы!');
-        });
+        function renderPost(postData, userData, postId, prepend = false) {
+            const existingPost = document.querySelector(`.post[data-id="${postId}"]`);
+            if (existingPost) return;
 
-        favoritesButton.addEventListener('click', () => {
-            alert('Избранное пока не реализовано!');
-        });
-
-        logoutButton.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                if (unsubscribeSnapshot) unsubscribeSnapshot();
-                localStorage.removeItem(`profile_${currentUser.uid}`);
-                window.location.href = 'auth.html';
-            } catch (error) {
-                console.error('Ошибка выхода:', error);
-                alert('Не удалось выйти!');
-            }
-        });
-
-        // Рендеринг поста
-        function renderPost(postData, postId, prepend = false) {
             const post = document.createElement('div');
             post.classList.add('post');
             post.dataset.createdAt = postData.createdAt;
@@ -980,8 +1147,17 @@
 
             const postAvatar = document.createElement('img');
             postAvatar.classList.add('post-avatar');
-            postAvatar.src = profileAvatar.src;
+            postAvatar.src = userData.avatar || 'https://img.icons8.com/ios/50/ffffff/user.png';
             postAvatar.alt = 'avatar';
+            postAvatar.addEventListener('click', () => {
+                avatarModalImage.src = postAvatar.src;
+                avatarModalUsername.textContent = userData.username || 'Guest';
+                avatarModalBio.textContent = userData.bio || 'Биография не указана';
+                statSubscriptions.textContent = userData.subscriptions || 0;
+                statSubscribers.textContent = userData.subscribers || 0;
+                statFriends.textContent = userData.friends || 0;
+                avatarModal.classList.add('active');
+            });
             postHeader.appendChild(postAvatar);
 
             const headerInfo = document.createElement('div');
@@ -990,16 +1166,8 @@
             
             const postUsernameElement = document.createElement('div');
             postUsernameElement.classList.add('post-username');
-            postUsernameElement.textContent = profileUsername.textContent;
+            postUsernameElement.textContent = userData.username || 'Guest';
             postUsernameContainer.appendChild(postUsernameElement);
-
-            if (profileVerified.style.display === 'block') {
-                const verifiedIcon = document.createElement('img');
-                verifiedIcon.classList.add('post-verified');
-                verifiedIcon.src = 'https://img.icons8.com/color/48/instagram-verification-badge.png';
-                verifiedIcon.alt = 'verified';
-                postUsernameContainer.appendChild(verifiedIcon);
-            }
 
             headerInfo.appendChild(postUsernameContainer);
 
@@ -1016,6 +1184,10 @@
                 postImage.classList.add('post-image');
                 postImage.src = postData.imageUrl;
                 postImage.alt = 'post image';
+                postImage.addEventListener('click', () => {
+                    postImageModal.src = postData.imageUrl;
+                    imageModal.classList.add('active');
+                });
                 post.appendChild(postImage);
             }
 
@@ -1076,13 +1248,12 @@
             });
 
             if (prepend) {
-                userPosts.prepend(post);
+                content.prepend(post);
             } else {
-                userPosts.appendChild(post);
+                content.appendChild(post);
             }
         }
 
-        // Отписка перед закрытием страницы
         window.addEventListener('beforeunload', () => {
             if (unsubscribeSnapshot) unsubscribeSnapshot();
         });
