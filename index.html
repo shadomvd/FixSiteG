@@ -132,40 +132,6 @@
             opacity: 1;
             transform: translateX(-50%) translateY(4px);
         }
-        .badge-icon {
-            width: 14px;
-            height: 14px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .badge-icon:hover {
-            transform: scale(1.1);
-        }
-        .badge-tooltip {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(145deg, #333344, #222233);
-            color: #ffffff;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 500;
-            white-space: nowrap;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-            z-index: 10;
-            opacity: 0;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        }
-        .badge-icon:hover + .badge-tooltip,
-        .badge-icon:active + .badge-tooltip,
-        .badge-icon.show-tooltip + .badge-tooltip {
-            display: block;
-            opacity: 1;
-            transform: translateX(-50%) translateY(4px);
-        }
         .search-container {
             position: relative;
             width: 100%;
@@ -337,12 +303,15 @@
             display: flex;
             align-items: center;
             gap: 3px;
-            position: relative;
         }
         .post-username {
             font-size: 13px;
             font-weight: 600;
             color: #c9d1d9;
+        }
+        .post-verified {
+            width: 14px;
+            height: 14px;
         }
         .post-time {
             font-size: 10px;
@@ -409,18 +378,18 @@
             opacity: 1;
         }
         .modal-content {
-    background: linear-gradient(145deg, #222233, #1a1a2a);
-    padding: 16px;
-    border-radius: 16px;
-    width: 90%;
-    max-width: 360px;
-    box-shadow: 0 3px 16px rgba(0, 0, 0, 0.6);
-    position: relative;
-    border: 1px solid #303044;
-    transform: scale(0.9);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-}
+            background: linear-gradient(145deg, #222233, #1a1a2a);
+            padding: 16px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 360px;
+            box-shadow: 0 3px 16px rgba(0, 0, 0, 0.6);
+            position: relative;
+            border: 1px solid #303044;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
         .modal.active .modal-content {
             transform: scale(1);
             opacity: 1;
@@ -745,10 +714,10 @@
             <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
             <img id="avatar-modal-image" class="avatar-modal-image" src="" alt="avatar"/>
             <div class="user-info">
-                <div class="username-container" id="avatar-modal-username-container">
+                <div class="username-container">
                     <h2 id="avatar-modal-username">Пользователь</h2>
                 </div>
-                <div class="user-bio" id="avatar-modal-bio"></div>
+                <div class="user-bio" id="avatar-modal-bio"></ festivals
                 <div class="user-stats">
                     <div class="stat-item">
                         <div class="stat-number" id="stat-subscriptions">0</div>
@@ -779,8 +748,10 @@
         </div>
     </div>
     <script type="module">
+        // Импорт функций Firebase
         import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy, onSnapshot } from './database.js';
 
+        // Объявление переменных DOM
         const searchInput = document.querySelector('.search-input');
         const notFoundCard = document.querySelector('.not-found-card');
         const navItems = document.querySelectorAll('.nav-item');
@@ -799,7 +770,6 @@
         const avatarModal = document.querySelector('#avatar-modal');
         const avatarModalImage = document.querySelector('#avatar-modal-image');
         const avatarModalUsername = document.querySelector('#avatar-modal-username');
-        const avatarModalUsernameContainer = document.querySelector('#avatar-modal-username-container');
         const avatarModalBio = document.querySelector('#avatar-modal-bio');
         const statSubscriptions = document.querySelector('#stat-subscriptions');
         const statSubscribers = document.querySelector('#stat-subscribers');
@@ -818,11 +788,15 @@
         let lastPostTimestamp = null;
         const POST_COOLDOWN = 5 * 60 * 1000;
 
-        if (!db || !onSnapshot) {
-            console.error('Firebase Firestore не инициализирован');
+        // Проверка загрузки Firebase
+        if (!auth || !db || !onSnapshot) {
+            console.error('Firebase не загружен корректно. Проверьте database.js');
             alert('Ошибка загрузки Firebase. Попробуйте позже.');
+            loadingOverlay.classList.remove('active');
+            return;
         }
 
+        // Отслеживание состояния авторизации
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -833,7 +807,7 @@
                     lastPostTimestamp = localStorage.getItem(`lastPost_${currentUser.uid}`) || null;
                 } catch (error) {
                     console.error('Ошибка загрузки постов:', error);
-                    alert('Не удалось загрузить посты. Проверьте настройки Firestore.');
+                    alert('Не удалось загрузить посты. Проверьте соединение.');
                 } finally {
                     loadingOverlay.classList.remove('active');
                 }
@@ -842,6 +816,7 @@
             }
         });
 
+        // Загрузка постов из Firestore
         async function loadPosts() {
             try {
                 const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
@@ -865,8 +840,7 @@
                                 bio: '',
                                 subscriptions: 0,
                                 subscribers: 0,
-                                friends: 0,
-                                badges: []
+                                friends: 0
                             };
                         }
                         renderPost(postData, users[postData.uid], postId);
@@ -883,6 +857,7 @@
             }
         }
 
+        // Подписка на новые посты
         function listenForNewPosts() {
             if (unsubscribeSnapshot) unsubscribeSnapshot();
 
@@ -912,8 +887,7 @@
                                         bio: '',
                                         subscriptions: 0,
                                         subscribers: 0,
-                                        friends: 0,
-                                        badges: []
+                                        friends: 0
                                     };
                                 }
                                 renderPost(postData, users[postData.uid], postId, true);
@@ -932,6 +906,7 @@
             }
         }
 
+        // Обновление времени постов
         function updatePostTimes() {
             const posts = content.querySelectorAll('.post');
             posts.forEach(post => {
@@ -959,6 +934,7 @@
 
         setInterval(updatePostTimes, 1000);
 
+        // Поиск постов
         searchInput.addEventListener('input', () => {
             const searchTerm = searchInput.value.trim().toLowerCase();
             const posts = content.querySelectorAll('.post');
@@ -985,6 +961,7 @@
             }
         });
 
+        // Навигация
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 navItems.forEach(i => i.classList.remove('active'));
@@ -999,18 +976,19 @@
             });
         });
 
-        verifiedIcon.addEventListener('touchstart', (e) => {
-            e.preventDefault();
+        // Обработчик для verifiedIcon (исправлено)
+        verifiedIcon.addEventListener('touchstart', () => {
             verifiedIcon.classList.add('show-tooltip');
             setTimeout(() => {
                 verifiedIcon.classList.remove('show-tooltip');
             }, 2000);
-        }, { passive: false });
+        }, { passive: true });
 
         verifiedIcon.addEventListener('click', () => {
             verifiedIcon.classList.toggle('show-tooltip');
         });
 
+        // Открытие модального окна для создания поста
         plusIcon.addEventListener('click', () => {
             if (lastPostTimestamp && (Date.now() - parseInt(lastPostTimestamp)) < POST_COOLDOWN) {
                 const timeLeft = Math.ceil((POST_COOLDOWN - (Date.now() - parseInt(lastPostTimestamp))) / 1000 / 60);
@@ -1021,6 +999,7 @@
             }
         });
 
+        // Закрытие модальных окон
         modalClose.addEventListener('click', () => {
             modal.classList.remove('active');
             resetModal();
@@ -1038,6 +1017,7 @@
             cooldownModal.classList.remove('active');
         });
 
+        // Загрузка изображения для поста
         imageUpload.addEventListener('click', () => {
             imageInput.click();
         });
@@ -1078,6 +1058,7 @@
             }
         });
 
+        // Загрузка изображения на Imgur
         async function uploadToImgur(file) {
             const formData = new FormData();
             formData.append('image', file);
@@ -1099,11 +1080,12 @@
                     throw new Error('Ошибка загрузки изображения в Imgur');
                 }
             } catch (error) {
-                console.error('Imgur upload error:', error);
+                console.error('Ошибка загрузки Imgur:', error);
                 throw error;
             }
         }
 
+        // Публикация поста
         publishButton.addEventListener('click', async () => {
             const title = postTitle.value.trim();
             const text = postText.value.trim();
@@ -1152,8 +1134,7 @@
                     bio: '',
                     subscriptions: 0,
                     subscribers: 0,
-                    friends: 0,
-                    badges: []
+                    friends: 0
                 };
                 cachedData.users[currentUser.uid] = userData;
                 cachedData.posts.unshift(postData);
@@ -1168,6 +1149,7 @@
             }
         });
 
+        // Сброс модального окна
         function resetModal() {
             postTitle.value = '';
             postText.value = '';
@@ -1176,6 +1158,7 @@
             imagePreview.src = '';
         }
 
+        // Получение данных пользователя
         async function fetchUserData(uid) {
             try {
                 const userRef = doc(db, 'users', uid);
@@ -1187,8 +1170,7 @@
                     bio: '',
                     subscriptions: 0,
                     subscribers: 0,
-                    friends: 0,
-                    badges: []
+                    friends: 0
                 };
             } catch (error) {
                 console.error('Ошибка загрузки данных пользователя:', error);
@@ -1199,12 +1181,12 @@
                     bio: '',
                     subscriptions: 0,
                     subscribers: 0,
-                    friends: 0,
-                    badges: []
+                    friends: 0
                 };
             }
         }
 
+        // Рендеринг поста
         function renderPost(postData, userData, postId, prepend = false) {
             const existingPost = document.querySelector(`.post[data-id="${postId}"]`);
             if (existingPost) return;
@@ -1230,50 +1212,6 @@
                     statSubscriptions.textContent = freshUserData.subscriptions || 0;
                     statSubscribers.textContent = freshUserData.subscribers || 0;
                     statFriends.textContent = freshUserData.friends || 0;
-
-                    // Очистка и добавление значков в модальном окне
-                    avatarModalUsernameContainer.innerHTML = `<h2 id="avatar-modal-username">${freshUserData.username || 'Guest'}</h2>`;
-                    const badges = freshUserData.badges || [];
-                    badges.forEach(badge => {
-                        let iconSrc, tooltipText;
-                        switch (badge.type) {
-                            case 'verified':
-                                iconSrc = 'https://img.icons8.com/color/48/instagram-verification-badge.png';
-                                tooltipText = badge.reason || 'Популярный пользователь';
-                                break;
-                            case 'nitro':
-                                iconSrc = 'https://i.imgur.com/nitro-icon.png'; // Замените на реальный URL
-                                tooltipText = badge.reason || 'Помощь администрации';
-                                break;
-                            case 'boost':
-                                iconSrc = 'https://i.imgur.com/boost-icon.png'; // Замените на реальный URL
-                                tooltipText = badge.reason || 'Реклама проекта';
-                                break;
-                            default:
-                                return;
-                        }
-
-                        const badgeIcon = document.createElement('img');
-                        badgeIcon.classList.add('badge-icon');
-                        badgeIcon.src = iconSrc;
-                        badgeIcon.alt = badge.type;
-
-                        const badgeTooltip = document.createElement('span');
-                        badgeTooltip.classList.add('badge-tooltip');
-                        badgeTooltip.textContent = tooltipText;
-
-                        avatarModalUsernameContainer.appendChild(badgeIcon);
-                        avatarModalUsernameContainer.appendChild(badgeTooltip);
-
-                        badgeIcon.addEventListener('touchstart', (e) => {
-                            e.preventDefault();
-                            badgeIcon.classList.add('show-tooltip');
-                            setTimeout(() => {
-                                badgeIcon.classList.remove('show-tooltip');
-                            }, 2000);
-                        }, { passive: false });
-                    });
-
                     avatarModal.classList.add('active');
                 } catch (error) {
                     console.error('Ошибка при открытии профиля:', error);
@@ -1290,46 +1228,13 @@
             postUsernameElement.textContent = userData.username || 'Guest';
             postUsernameContainer.appendChild(postUsernameElement);
 
-            const badges = userData.badges || [];
-            badges.forEach(badge => {
-                let iconSrc, tooltipText;
-                switch (badge.type) {
-                    case 'verified':
-                        iconSrc = 'https://img.icons8.com/color/48/instagram-verification-badge.png';
-                        tooltipText = badge.reason || 'Популярный пользователь';
-                        break;
-                    case 'nitro':
-                        iconSrc = 'https://i.imgur.com/nitro-icon.png'; // Замените на реальный URL
-                        tooltipText = badge.reason || 'Помощь администрации';
-                        break;
-                    case 'boost':
-                        iconSrc = 'https://i.imgur.com/boost-icon.png'; // Замените на реальный URL
-                        tooltipText = badge.reason || 'Реклама проекта';
-                        break;
-                    default:
-                        return;
-                }
-
-                const badgeIcon = document.createElement('img');
-                badgeIcon.classList.add('badge-icon');
-                badgeIcon.src = iconSrc;
-                badgeIcon.alt = badge.type;
-
-                const badgeTooltip = document.createElement('span');
-                badgeTooltip.classList.add('badge-tooltip');
-                badgeTooltip.textContent = tooltipText;
-
-                postUsernameContainer.appendChild(badgeIcon);
-                postUsernameContainer.appendChild(badgeTooltip);
-
-                badgeIcon.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    badgeIcon.classList.add('show-tooltip');
-                    setTimeout(() => {
-                        badgeIcon.classList.remove('show-tooltip');
-                    }, 2000);
-                }, { passive: false });
-            });
+            if (userData.verify) {
+                const verifiedIcon = document.createElement('img');
+                verifiedIcon.classList.add('post-verified');
+                verifiedIcon.src = 'https://img.icons8.com/color/48/instagram-verification-badge.png';
+                verifiedIcon.alt = 'verified';
+                postUsernameContainer.appendChild(verifiedIcon);
+            }
 
             headerInfo.appendChild(postUsernameContainer);
 
@@ -1378,7 +1283,6 @@
             const likeCount = document.createElement('span');
             likeCount.textContent = '0';
             likeAction.appendChild(likeIcon);
-            likeAction 
             likeAction.appendChild(likeCount);
             postActions.appendChild(likeAction);
 
@@ -1417,6 +1321,7 @@
             }
         }
 
+        // Отписка перед закрытием страницы
         window.addEventListener('beforeunload', () => {
             if (unsubscribeSnapshot) unsubscribeSnapshot();
         });
