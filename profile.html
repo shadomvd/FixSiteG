@@ -435,10 +435,6 @@
                         <div class="stat-number" id="stat-subscribers">0</div>
                         <div class="stat-label">Подписчики</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="stat-likes">0</div>
-                        <div class="stat-label">Лайки</div>
-                    </div>
                 </div>
                 <img class="edit-profile-button" id="edit-profile-button" src="https://img.icons8.com/ios/50/ffffff/edit--v1.png" alt="edit"/>
             </div>
@@ -482,7 +478,7 @@
         </div>
     </div>
     <script type="module">
-        import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, signOut, collection, getDocs, query, where } from './database.js';
+        import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, signOut } from './database.js';
 
         const profileAvatar = document.querySelector('#profile-avatar');
         const avatarUpload = document.querySelector('#avatar-upload');
@@ -490,7 +486,6 @@
         const profileBio = document.querySelector('#profile-bio');
         const statSubscriptions = document.querySelector('#stat-subscriptions');
         const statSubscribers = document.querySelector('#stat-subscribers');
-        const statLikes = document.querySelector('#stat-likes');
         const editProfileButton = document.querySelector('#edit-profile-button');
         const settingsButton = document.querySelector('#settings-button');
         const favoritesButton = document.querySelector('#favorites-button');
@@ -512,7 +507,6 @@
                 loadingOverlay.classList.add('active');
                 try {
                     await loadProfile();
-                    await updateLikesFromPosts();
                 } catch (error) {
                     console.error('Ошибка инициализации профиля:', error);
                     alert('Не удалось загрузить профиль. Попробуйте снова.');
@@ -534,7 +528,6 @@
                     avatar: 'https://img.icons8.com/ios/50/ffffff/user.png',
                     subscriptions: 0,
                     subscribers: 0,
-                    likes: 0,
                     verify: false
                 };
 
@@ -550,7 +543,6 @@
                 profileAvatar.src = userData.avatar;
                 statSubscriptions.textContent = userData.subscriptions;
                 statSubscribers.textContent = userData.subscribers;
-                statLikes.textContent = userData.likes;
             } catch (error) {
                 console.error('Ошибка загрузки профиля:', error);
                 throw error;
@@ -580,25 +572,6 @@
             } catch (error) {
                 console.error('Imgur upload error:', error);
                 throw error;
-            }
-        }
-
-        async function updateLikesFromPosts() {
-            try {
-                const postsQuery = query(collection(db, 'posts'), where('uid', '==', currentUser.uid));
-                const postsSnapshot = await getDocs(postsQuery);
-                let totalLikes = 0;
-
-                postsSnapshot.forEach(doc => {
-                    const postData = doc.data();
-                    totalLikes += postData.likes || 0;
-                });
-
-                await updateDoc(doc(db, 'users', currentUser.uid), { likes: totalLikes });
-                statLikes.textContent = totalLikes;
-            } catch (error) {
-                console.error('Ошибка подсчета лайков:', error);
-                statLikes.textContent = '0';
             }
         }
 
