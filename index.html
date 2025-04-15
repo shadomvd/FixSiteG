@@ -21,10 +21,7 @@
             color: #ffffff;
             overscroll-behavior: none;
             -webkit-overflow-scrolling: touch;
-            touch-action: none;
-            overflow: hidden;
-            -webkit-text-size-adjust: none;
-            text-size-adjust: none;
+            overflow-y: auto; /* Разрешаем прокрутку */
         }
         .container {
             display: flex;
@@ -36,7 +33,6 @@
             padding: 16px;
             background: linear-gradient(180deg, #1e1e2e 0%, #0f0f1a 100%);
             position: relative;
-            touch-action: none;
         }
         .content {
             flex-grow: 1;
@@ -44,8 +40,8 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            overflow-y: auto;
-            touch-action: pan-y;
+            overflow-y: auto; /* Разрешаем прокрутку контента */
+            -webkit-overflow-scrolling: touch;
         }
         .nav-bar {
             width: 100%;
@@ -727,8 +723,11 @@
             item.addEventListener('click', () => {
                 navItems.forEach(i => i.classList.remove('active'));
                 item.classList.add('active');
-                if (item.querySelector('.nav-text').textContent === 'Профиль') {
+                const navText = item.querySelector('.nav-text').textContent;
+                if (navText === 'Профиль') {
                     window.location.href = 'profile.html';
+                } else if (navText === 'Лидеры') {
+                    alert('Переход на страницу лидеров (заглушка)!');
                 }
             });
         });
