@@ -19,7 +19,7 @@
             height: 100%;
             background: #0f0f1a;
             color: #ffffff;
-            overscroll-behavior: none;
+            overscroll-behavior: none自家
             -webkit-overflow-scrolling: touch;
             overflow-y: auto;
         }
@@ -518,9 +518,9 @@
             box-shadow: 0 2px 8px rgba(100, 100, 255, 0.4);
         }
         .avatar-modal-image {
-            width: 100%;
-            max-height: 300px;
-            object-fit: contain;
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
             border-radius: 50%;
             background: #1a1a2a;
             border: 1px solid #303044;
@@ -567,6 +567,20 @@
             font-size: 10px;
             font-weight: 400;
             color: #8b949e;
+        }
+        .username-container {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .user-bio {
+            font-size: 12px;
+            font-weight: 400;
+            color: #c9d1d9;
+            text-align: center;
+            margin-top: 8px;
+            max-width: 90%;
+            word-wrap: break-word;
         }
         @keyframes fadeInElement {
             from { opacity: 0; transform: translateY(10px); }
@@ -658,7 +672,11 @@
             <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
             <img id="avatar-modal-image" class="avatar-modal-image" src="" alt="avatar"/>
             <div class="user-info">
-                <h2 id="avatar-modal-username">Пользователь</h2>
+                <div class="username-container">
+                    <h2 id="avatar-modal-username">Пользователь</h2>
+                    <img id="avatar-modal-verified" class="post-verified" src="https://img.icons8.com/color/48/instagram-verification-badge.png" alt="verified" style="display: none;"/>
+                </div>
+                <div class="user-bio" id="avatar-modal-bio"></div>
                 <div class="user-stats">
                     <div class="stat-item">
                         <div class="stat-number" id="stat-subscriptions">0</div>
@@ -703,6 +721,8 @@
         const avatarModal = document.querySelector('#avatar-modal');
         const avatarModalImage = document.querySelector('#avatar-modal-image');
         const avatarModalUsername = document.querySelector('#avatar-modal-username');
+        const avatarModalVerified = document.querySelector('#avatar-modal-verified');
+        const avatarModalBio = document.querySelector('#avatar-modal-bio');
         const statSubscriptions = document.querySelector('#stat-subscriptions');
         const statSubscribers = document.querySelector('#stat-subscribers');
         const statFriends = document.querySelector('#stat-friends');
@@ -762,6 +782,7 @@
                             username: 'Guest', 
                             avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', 
                             verify: false,
+                            bio: '',
                             subscriptions: 0,
                             subscribers: 0,
                             friends: 0
@@ -802,6 +823,7 @@
                                     username: 'Guest', 
                                     avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', 
                                     verify: false,
+                                    bio: '',
                                     subscriptions: 0,
                                     subscribers: 0,
                                     friends: 0
@@ -1027,6 +1049,7 @@
                     username: 'Guest', 
                     avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', 
                     verify: false,
+                    bio: '',
                     subscriptions: 0,
                     subscribers: 0,
                     friends: 0
@@ -1069,6 +1092,8 @@
             postAvatar.addEventListener('click', () => {
                 avatarModalImage.src = postAvatar.src;
                 avatarModalUsername.textContent = userData.username || 'Guest';
+                avatarModalVerified.style.display = userData.verify ? 'block' : 'none';
+                avatarModalBio.textContent = userData.bio || 'Биография не указана';
                 statSubscriptions.textContent = userData.subscriptions || 0;
                 statSubscribers.textContent = userData.subscribers || 0;
                 statFriends.textContent = userData.friends || 0;
