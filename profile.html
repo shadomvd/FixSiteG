@@ -112,7 +112,7 @@
             gap: 6px;
             z-index: 1;
             width: 100%;
-            max-width: 180px;
+            max-width: 220px;
         }
         .profile-username-wrapper {
             display: flex;
@@ -144,7 +144,7 @@
             border-radius: 6px;
             border: 1px solid rgba(100, 100, 150, 0.3);
             width: 100%;
-            max-width: 180px;
+            max-width: 260px;
             line-height: 1.2;
         }
         .profile-stats {
@@ -319,7 +319,7 @@
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(100, DATABASE_URL100, 255, 0.4);
+            box-shadow: 0 2px 8px rgba(100, 100, 255, 0.4);
             transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
             animation: fadeInElement 0.5s ease forwards;
         }
@@ -416,6 +416,79 @@
         }
         .nav-item.active img {
             filter: brightness(1);
+        }
+
+        /* Адаптивные стили для разных устройств */
+        @media (min-width: 481px) and (max-width: 767px) {
+            .container {
+                max-width: 90%;
+            }
+            .nav-bar {
+                max-width: 100%;
+            }
+            .profile-section {
+                max-width: 100%;
+            }
+            .settings-section {
+                max-width: 100%;
+            }
+            .navigation {
+                max-width: 90%;
+            }
+            .profile-username-container {
+                max-width: 260px;
+            }
+            .profile-bio {
+                max-width: 300px;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .container {
+                max-width: 700px;
+            }
+            .nav-bar {
+                max-width: 100%;
+            }
+            .profile-section {
+                max-width: 100%;
+            }
+            .settings-section {
+                max-width: 100%;
+            }
+            .navigation {
+                max-width: 700px;
+            }
+            .profile-username-container {
+                max-width: 300px;
+            }
+            .profile-bio {
+                max-width: 340px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 900px;
+            }
+            .nav-bar {
+                max-width: 100%;
+            }
+            .profile-section {
+                max-width: 100%;
+            }
+            .settings-section {
+                max-width: 100%;
+            }
+            .navigation {
+                max-width: 900px;
+            }
+            .profile-username-container {
+                max-width: 340px;
+            }
+            .profile-bio {
+                max-width: 380px;
+            }
         }
     </style>
 </head>
@@ -691,6 +764,7 @@
             try {
                 const cacheKey = `userData_${currentUser.uid}`;
                 localStorage.removeItem(cacheKey);
+                localStorage.removeItem(`posts_${currentUser.uid}`);
                 await signOut(auth);
                 window.location.href = 'auth.html';
             } catch (error) {
