@@ -348,29 +348,13 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            cursor: pointer;
             color: #8b949e;
             font-size: 13px;
-            transition: color 0.2s, transform 0.2s;
         }
         .action-item img {
             width: 20px;
             height: 20px;
             filter: brightness(0.7);
-            transition: filter 0.2s, transform 0.2s;
-        }
-        .action-item:hover {
-            color: #ffffff;
-        }
-        .action-item:hover img {
-            filter: brightness(1);
-            transform: scale(1.15);
-        }
-        .action-item.active {
-            color: #6464ff;
-        }
-        .action-item.active img {
-            filter: brightness(1);
         }
         .modal {
             display: none;
@@ -615,7 +599,7 @@
         </div>
     </div>
     <script type="module">
-        import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy, updateDoc, onSnapshot } from './database.js';
+        import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy, onSnapshot } from './database.js';
 
         const searchInput = document.querySelector('.search-input');
         const notFoundCard = document.querySelector('.not-found-card');
@@ -635,7 +619,6 @@
 
         const IMGUR_CLIENT_ID = '8ea63c636bd153e';
         let currentUser = null;
-        let userInteractions = new Map();
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -665,7 +648,7 @@
                 try {
                     const userRef = doc(db, 'users', postData.uid);
                     const userDoc = await getDoc(userRef);
-                    const userData = userDoc.exists() ? userDoc.data() : { username: 'Guest', avatar: 'https://img.icons8.com/ios/50/ffffff/user.png' };
+                    const userData = userDoc.exists() ? userDoc.data() : { username: 'Guest', avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', verify: false };
                     renderPost(postData, userData, postId);
                 } catch (error) {
                     console.error(`Ошибка загрузки профиля для поста ${postId}:`, error);
@@ -681,7 +664,7 @@
                         const postData = change.doc.data();
                         const postId = change.doc.id;
                         getDoc(doc(db, 'users', postData.uid)).then(userDoc => {
-                            const userData = userDoc.exists() ? userDoc.data() : { username: 'Guest', avatar: 'https://img.icons8.com/ios/50/ffffff/user.png' };
+                            const userData = userDoc.exists() ? userDoc.data() : { username: 'Guest', avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', verify: false };
                             renderPost(postData, userData, postId, true);
                         }).catch(error => {
                             console.error(`Ошибка загрузки профиля для нового поста ${postId}:`, error);
@@ -765,7 +748,7 @@
             setTimeout(() => {
                 verifiedIcon.classList.remove('show-tooltip');
             }, 2000);
-        });
+        }, { passive: true });
 
         verifiedIcon.addEventListener('click', () => {
             verifiedIcon.classList.toggle('show-tooltip');
@@ -875,8 +858,6 @@
                 text,
                 imageUrl,
                 createdAt: Date.now(),
-                likes: 0,
-                dislikes: 0,
                 comments: 0
             };
 
@@ -898,86 +879,6 @@
             imageInput.value = '';
             imageUpload.classList.remove('has-image');
             imagePreview.src = '';
-        }
-
-        async function handleLike(postId, likeAction, dislikeAction, likeCount, dislikeCount) {
-            const interaction = userInteractions.get(postId) || { liked: false, disliked: false };
-            
-            if (!interaction.liked) {
-                const newLikeCount = parseInt(likeCount.textContent) + 1;
-                likeAction.classList.add('active');
-                
-                let updates = { likes: newLikeCount };
-                if (interaction.disliked) {
-                    const newDislikeCount = parseInt(dislikeCount.textContent) - 1;
-                    dislikeAction.classList.remove('active');
-                    updates.dislikes = newDislikeCount;
-                    interaction.disliked = false;
-                }
-                
-                interaction.liked = true;
-                userInteractions.set(postId, interaction);
-                
-                try {
-                    const postRef = doc(db, 'posts', postId);
-                    await updateDoc(postRef, updates);
-                    likeCount.textContent = newLikeCount;
-                    if (updates.dislikes !== undefined) {
-                        dislikeCount.textContent = updates.dislikes;
-                    }
-                } catch (error) {
-                    console.error('Ошибка обновления лайка:', error);
-                    likeAction.classList.remove('active');
-                    likeCount.textContent = newLikeCount - 1;
-                    if (interaction.disliked) {
-                        dislikeAction.classList.add('active');
-                        dislikeCount.textContent = parseInt(dislikeCount.textContent) + 1;
-                    }
-                    interaction.liked = false;
-                    userInteractions.set(postId, interaction);
-                    alert('Ошибка при установке лайка!');
-                }
-            }
-        }
-
-        async function handleDislike(postId, dislikeAction, likeAction, dislikeCount, likeCount) {
-            const interaction = userInteractions.get(postId) || { liked: false, disliked: false };
-            
-            if (!interaction.disliked) {
-                const newDislikeCount = parseInt(dislikeCount.textContent) + 1;
-                dislikeAction.classList.add('active');
-                
-                let updates = { dislikes: newDislikeCount };
-                if (interaction.liked) {
-                    const newLikeCount = parseInt(likeCount.textContent) - 1;
-                    likeAction.classList.remove('active');
-                    updates.likes = newLikeCount;
-                    interaction.liked = false;
-                }
-                
-                interaction.disliked = true;
-                userInteractions.set(postId, interaction);
-                
-                try {
-                    const postRef = doc(db, 'posts', postId);
-                    await updateDoc(postRef, updates);
-                    dislikeCount.textContent = newDislikeCount;
-                    if (updates.likes !== undefined) {
-                        likeCount.textContent = updates.likes;
-                    }
-                } catch (error) {
-                    console.error('Ошибка обновления дизлайка:', error);
-                    dislikeAction.classList.remove('active');
-                    dislikeCount.textContent = newDislikeCount - 1;
-                    if (interaction.liked) {
-                        likeAction.classList.add('active');
-                        likeCount.textContent = parseInt(likeCount.textContent) + 1;
-                    }
-                    interaction.disliked = false;
-                    userInteractions.set(postId, interaction);
-                    alert('Ошибка при установке дизлайка!');
-                }
-            }
         }
 
         function renderPost(postData, userData, postId, prepend = false) {
@@ -1056,7 +957,7 @@
             likeIcon.src = 'https://img.icons8.com/ios/50/ffffff/like--v1.png';
             likeIcon.alt = 'like';
             const likeCount = document.createElement('span');
-            likeCount.textContent = postData.likes || 0;
+            likeCount.textContent = '0';
             likeAction.appendChild(likeIcon);
             likeAction.appendChild(likeCount);
             postActions.appendChild(likeAction);
@@ -1067,7 +968,7 @@
             dislikeIcon.src = 'https://img.icons8.com/ios/50/ffffff/dislike--v1.png';
             dislikeIcon.alt = 'dislike';
             const dislikeCount = document.createElement('span');
-            dislikeCount.textContent = postData.dislikes || 0;
+            dislikeCount.textContent = '0';
             dislikeAction.appendChild(dislikeIcon);
             dislikeAction.appendChild(dislikeCount);
             postActions.appendChild(dislikeAction);
@@ -1084,14 +985,6 @@
             postActions.appendChild(commentAction);
 
             post.appendChild(postActions);
-
-            likeAction.addEventListener('click', () => {
-                handleLike(postId, likeAction, dislikeAction, likeCount, dislikeCount);
-            });
-
-            dislikeAction.addEventListener('click', () => {
-                handleDislike(postId, dislikeAction, likeAction, dislikeCount, likeCount);
-            });
 
             commentAction.addEventListener('click', () => {
                 alert('Комментарии пока не реализованы!');
