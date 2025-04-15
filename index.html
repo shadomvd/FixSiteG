@@ -619,6 +619,8 @@
 
         const IMGUR_CLIENT_ID = '8ea63c636bd153e';
         let currentUser = null;
+        let postsCache = null;
+        const CACHE_KEY = 'postsCache';
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -639,9 +641,20 @@
         });
 
         async function loadPosts() {
+            const cachedPosts = sessionStorage.getItem(CACHE_KEY);
+            if (cachedPosts) {
+                postsCache = JSON.parse(cachedPosts);
+                renderCachedPosts();
+            } else {
+                await fetchPosts();
+            }
+        }
+
+        async function fetchPosts() {
             content.innerHTML = '';
             const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
             const querySnapshot = await getDocs(postsQuery);
+            postsCache = [];
             for (const postDoc of querySnapshot.docs) {
                 const postData = postDoc.data();
                 const postId = postDoc.id;
@@ -649,11 +662,21 @@
                     const userRef = doc(db, 'users', postData.uid);
                     const userDoc = await getDoc(userRef);
                     const userData = userDoc.exists() ? userDoc.data() : { username: 'Guest', avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', verify: false };
+                    const postEntry = { postId, postData, userData };
+                    postsCache.push(postEntry);
                     renderPost(postData, userData, postId);
                 } catch (error) {
                     console.error(`Ошибка загрузки профиля для поста ${postId}:`, error);
                 }
             }
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify(postsCache));
+        }
+
+        function renderCachedPosts() {
+            content.innerHTML = '';
+            postsCache.forEach(({ postData, userData, postId }) => {
+                renderPost(postData, userData, postId);
+            });
         }
 
         function listenForNewPosts() {
@@ -663,8 +686,13 @@
                     if (change.type === 'added') {
                         const postData = change.doc.data();
                         const postId = change.doc.id;
+                        const existingPost = postsCache.find(post => post.postId === postId);
+                        if (existingPost) return;
                         getDoc(doc(db, 'users', postData.uid)).then(userDoc => {
                             const userData = userDoc.exists() ? userDoc.data() : { username: 'Guest', avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', verify: false };
+                            const postEntry = { postId, postData, userData };
+                            postsCache.unshift(postEntry);
+                            sessionStorage.setItem(CACHE_KEY, JSON.stringify(postsCache));
                             renderPost(postData, userData, postId, true);
                         }).catch(error => {
                             console.error(`Ошибка загрузки профиля для нового поста ${postId}:`, error);
