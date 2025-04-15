@@ -21,7 +21,7 @@
             color: #ffffff;
             overscroll-behavior: none;
             -webkit-overflow-scrolling: touch;
-            overflow-y: auto; /* Разрешаем прокрутку */
+            overflow-y: auto;
         }
         .container {
             display: flex;
@@ -509,8 +509,16 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                await loadProfile();
-                await updateLikesFromPosts();
+                loadingOverlay.classList.add('active');
+                try {
+                    await loadProfile();
+                    await updateLikesFromPosts();
+                } catch (error) {
+                    console.error('Ошибка инициализации профиля:', error);
+                    alert('Не удалось загрузить профиль. Попробуйте снова.');
+                } finally {
+                    loadingOverlay.classList.remove('active');
+                }
             } else {
                 window.location.href = 'auth.html';
             }
@@ -518,7 +526,6 @@
 
         async function loadProfile() {
             try {
-                loadingOverlay.classList.add('active');
                 const userDocRef = doc(db, 'users', currentUser.uid);
                 const userDoc = await getDoc(userDocRef);
                 const defaultData = {
@@ -527,26 +534,26 @@
                     avatar: 'https://img.icons8.com/ios/50/ffffff/user.png',
                     subscriptions: 0,
                     subscribers: 0,
-                    likes: 0
+                    likes: 0,
+                    verify: false
                 };
 
-                const userData = userDoc.exists() ? userDoc.data() : defaultData;
-
-                profileUsername.textContent = userData.username || defaultData.username;
-                profileBio.textContent = userData.bio || defaultData.bio;
-                profileAvatar.src = userData.avatar || defaultData.avatar;
-                statSubscriptions.textContent = userData.subscriptions || 0;
-                statSubscribers.textContent = userData.subscribers || 0;
-                statLikes.textContent = userData.likes || 0;
-
-                if (!userDoc.exists()) {
+                let userData = defaultData;
+                if (userDoc.exists()) {
+                    userData = { ...defaultData, ...userDoc.data() };
+                } else {
                     await setDoc(userDocRef, defaultData);
                 }
+
+                profileUsername.textContent = userData.username;
+                profileBio.textContent = userData.bio;
+                profileAvatar.src = userData.avatar;
+                statSubscriptions.textContent = userData.subscriptions;
+                statSubscribers.textContent = userData.subscribers;
+                statLikes.textContent = userData.likes;
             } catch (error) {
                 console.error('Ошибка загрузки профиля:', error);
-                alert('Ошибка загрузки профиля!');
-            } finally {
-                loadingOverlay.classList.remove('active');
+                throw error;
             }
         }
 
@@ -605,13 +612,14 @@
                 loadingOverlay.classList.add('active');
                 try {
                     const avatarUrl = await uploadToImgur(file);
-                    await setDoc(doc(db, 'users', currentUser.uid), { avatar: avatarUrl }, { merge: true });
+                    await updateDoc(doc(db, 'users', currentUser.uid), { avatar: avatarUrl });
                     profileAvatar.src = avatarUrl;
                 } catch (error) {
                     alert('Ошибка загрузки аватара!');
-                    console.error(error);
+                    console.error('Ошибка загрузки аватара:', error);
+                } finally {
+                    loadingOverlay.classList.remove('active');
                 }
-                loadingOverlay.classList.remove('active');
             }
         });
 
@@ -631,18 +639,19 @@
             if (newUsername) {
                 loadingOverlay.classList.add('active');
                 try {
-                    await setDoc(doc(db, 'users', currentUser.uid), {
+                    await updateDoc(doc(db, 'users', currentUser.uid), {
                         username: newUsername,
                         bio: newBio || 'О себе...'
-                    }, { merge: true });
+                    });
                     profileUsername.textContent = newUsername;
                     profileBio.textContent = newBio || 'О себе...';
                     modal.classList.remove('active');
                 } catch (error) {
                     alert('Ошибка сохранения профиля!');
-                    console.error(error);
+                    console.error('Ошибка сохранения профиля:', error);
+                } finally {
+                    loadingOverlay.classList.remove('active');
                 }
-                loadingOverlay.classList.remove('active');
             } else {
                 alert('Логин не может быть пустым!');
             }
@@ -663,9 +672,10 @@
                 window.location.href = 'auth.html';
             } catch (error) {
                 alert('Ошибка при выходе!');
-                console.error(error);
+                console.error('Ошибка при выходе:', error);
+            } finally {
+                loadingOverlay.classList.remove('active');
             }
-            loadingOverlay.classList.remove('active');
         });
 
         navItems.forEach(item => {
