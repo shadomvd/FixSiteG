@@ -114,6 +114,11 @@
             width: 100%;
             max-width: 250px;
         }
+        .profile-username-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
         .profile-username {
             font-size: 18px;
             font-weight: 600;
@@ -121,6 +126,10 @@
             text-align: center;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
             letter-spacing: 0.3px;
+        }
+        .profile-verified {
+            width: 16px;
+            height: 16px;
         }
         .profile-bio {
             font-size: 13px;
@@ -423,7 +432,10 @@
                 <img class="profile-avatar" id="profile-avatar" src="https://img.icons8.com/ios/50/ffffff/user.png" alt="avatar"/>
                 <input type="file" id="avatar-upload" class="avatar-upload" accept="image/*">
                 <div class="profile-username-container">
-                    <div class="profile-username" id="profile-username">Guest</div>
+                    <div class="profile-username-wrapper">
+                        <div class="profile-username" id="profile-username">Guest</div>
+                        <img class="profile-verified" id="profile-verified" src="https://img.icons8.com/color/48/instagram-verification-badge.png" alt="verified" style="display: none;"/>
+                    </div>
                     <div class="profile-bio" id="profile-bio">О себе...</div>
                 </div>
                 <div class="profile-stats">
@@ -487,6 +499,7 @@
         const profileAvatar = document.querySelector('#profile-avatar');
         const avatarUpload = document.querySelector('#avatar-upload');
         const profileUsername = document.querySelector('#profile-username');
+        const profileVerified = document.querySelector('#profile-verified');
         const profileBio = document.querySelector('#profile-bio');
         const statSubscriptions = document.querySelector('#stat-subscriptions');
         const statSubscribers = document.querySelector('#stat-subscribers');
@@ -573,6 +586,7 @@
             statSubscriptions.textContent = userData.subscriptions;
             statSubscribers.textContent = userData.subscribers;
             statFriends.textContent = userData.friends || 0;
+            profileVerified.style.display = userData.verify ? 'block' : 'none';
         }
 
         async function uploadToImgur(file) {
