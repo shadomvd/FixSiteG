@@ -417,8 +417,110 @@
         .nav-item.active img {
             filter: brightness(1);
         }
-
-        /* Адаптивные стили для разных устройств */
+        .post {
+            background: linear-gradient(145deg, #222233, #1a1a2a);
+            padding: 14px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+            border: 0.5px solid rgba(100, 100, 150, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            animation: immerseIn 0.5s ease forwards;
+        }
+        .post:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 14px rgba(100, 100, 255, 0.2);
+        }
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .post-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #1a1a2a;
+            border: 1px solid #444455;
+            cursor: pointer;
+        }
+        .post-username-container {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .post-username {
+            font-size: 13px;
+            font-weight: 600;
+            color: #c9d1d9;
+        }
+        .post-verified {
+            width: 14px;
+            height: 14px;
+        }
+        .post-time {
+            font-size: 10px;
+            color: #8b949e;
+            margin-top: 2px;
+        }
+        .post-image {
+            width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            background: #1a1a2a;
+            border-radius: 6px;
+            border: 1px solid #303044;
+            cursor: pointer;
+        }
+        .post-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+        .post-text {
+            font-size: 13px;
+            font-weight: 400;
+            color: #c9d1d9;
+            line-height: 1.4;
+        }
+        .post-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-top: 8px;
+            border-top: 1px solid #303044;
+        }
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #8b949e;
+            font-size: 12px;
+        }
+        .action-item img {
+            width: 18px;
+            height: 18px;
+            filter: brightness(0.7);
+        }
+        @keyframes immerseIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.95);
+                filter: blur(4px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
         @media (min-width: 481px) and (max-width: 767px) {
             .container {
                 max-width: 90%;
@@ -442,7 +544,6 @@
                 max-width: 300px;
             }
         }
-
         @media (min-width: 768px) and (max-width: 1023px) {
             .container {
                 max-width: 700px;
@@ -466,7 +567,6 @@
                 max-width: 340px;
             }
         }
-
         @media (min-width: 1024px) {
             .container {
                 max-width: 900px;
@@ -535,14 +635,15 @@
                     Настройки
                 </button>
                 <button class="settings-button" id="favorites-button">
-                    <img src="https://img.icons8.com/ios/50/ffffff/bookmark-ribbon.png" alt="favorites"/>
+                    <img src="https://img.icons8.com/ios/50/ffffff/star--v1.png" alt="favorites"/>
                     Избранное
                 </button>
                 <button class="settings-button" id="logout-button">
-                    <img src="https://img.icons8.com/ios/50/ffffff/exit.png" alt="logout"/>
+                    <img src="https://img.icons8.com/ios/50/ffffff/logout-rounded.png" alt="logout"/>
                     Выйти
                 </button>
             </div>
+            <div id="user-posts"></div>
         </div>
         <div class="navigation">
             <div class="nav-item">
@@ -559,18 +660,20 @@
             </div>
         </div>
     </div>
-    <div class="modal" id="edit-modal">
+    <div class="modal" id="edit-profile-modal">
         <div class="modal-content">
             <img class="modal-close" id="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
             <h2>Редактировать профиль</h2>
-            <input type="text" id="edit-username" placeholder="Логин (макс. 16 символов)" maxlength="16">
+            <input type="text" id="edit-username" placeholder="Имя пользователя (макс. 16 символов)" maxlength="16">
             <textarea id="edit-bio" placeholder="О себе (макс. 100 символов)" maxlength="100"></textarea>
-            <button class="save-button" id="save-button">Сохранить</button>
+            <button class="save-button" id="save-profile">Сохранить</button>
         </div>
     </div>
     <script type="module">
-        import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, signOut } from './database.js';
+        // Импорт функций Firebase
+        import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, signOut, collection, query, where, orderBy, onSnapshot } from './database.js';
 
+        // Объявление переменных DOM
         const profileAvatar = document.querySelector('#profile-avatar');
         const avatarUpload = document.querySelector('#avatar-upload');
         const profileUsername = document.querySelector('#profile-username');
@@ -583,27 +686,39 @@
         const settingsButton = document.querySelector('#settings-button');
         const favoritesButton = document.querySelector('#favorites-button');
         const logoutButton = document.querySelector('#logout-button');
-        const modal = document.querySelector('#edit-modal');
+        const editProfileModal = document.querySelector('#edit-profile-modal');
         const modalClose = document.querySelector('#modal-close');
         const editUsername = document.querySelector('#edit-username');
         const editBio = document.querySelector('#edit-bio');
-        const saveButton = document.querySelector('#save-button');
-        const navItems = document.querySelectorAll('.nav-item');
+        const saveProfile = document.querySelector('#save-profile');
+        const userPosts = document.querySelector('#user-posts');
         const loadingOverlay = document.querySelector('#loading-overlay');
+        const navItems = document.querySelectorAll('.nav-item');
 
         const IMGUR_CLIENT_ID = '8ea63c636bd153e';
         let currentUser = null;
-        let userDataCache = null;
+        let unsubscribeSnapshot = null;
 
+        // Проверка загрузки Firebase
+        if (!auth || !db || !onSnapshot) {
+            console.error('Firebase не загружен корректно. Проверьте database.js');
+            alert('Ошибка загрузки Firebase. Попробуйте позже.');
+            loadingOverlay.classList.remove('active');
+            return;
+        }
+
+        // Отслеживание состояния авторизации
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 loadingOverlay.classList.add('active');
                 try {
                     await loadProfile();
+                    await loadUserPosts();
+                    listenForUserPosts();
                 } catch (error) {
-                    console.error('Ошибка инициализации профиля:', error);
-                    alert('Не удалось загрузить профиль. Попробуйте снова.');
+                    console.error('Ошибка загрузки профиля или постов:', error);
+                    alert('Не удалось загрузить данные профиля. Проверьте соединение.');
                 } finally {
                     loadingOverlay.classList.remove('active');
                 }
@@ -612,58 +727,139 @@
             }
         });
 
+        // Загрузка профиля пользователя
         async function loadProfile() {
-            const cacheKey = `userData_${currentUser.uid}`;
-            const cachedData = localStorage.getItem(cacheKey);
-
-            if (cachedData) {
-                userDataCache = JSON.parse(cachedData);
-                updateProfileUI(userDataCache);
-            } else {
-                await fetchProfileData();
-            }
-        }
-
-        async function fetchProfileData() {
             try {
-                const userDocRef = doc(db, 'users', currentUser.uid);
-                const userDoc = await getDoc(userDocRef);
-                const defaultData = {
+                const userRef = doc(db, 'users', currentUser.uid);
+                const userDoc = await getDoc(userRef);
+                let userData = {
                     username: 'Guest',
-                    bio: 'О себе...',
                     avatar: 'https://img.icons8.com/ios/50/ffffff/user.png',
+                    bio: 'О себе...',
+                    verify: false,
                     subscriptions: 0,
                     subscribers: 0,
-                    friends: 0,
-                    verify: false
+                    friends: 0
                 };
 
-                userDataCache = defaultData;
                 if (userDoc.exists()) {
-                    userDataCache = { ...defaultData, ...userDoc.data() };
+                    userData = userDoc.data();
                 } else {
-                    await setDoc(userDocRef, defaultData);
+                    await setDoc(userRef, userData);
                 }
 
-                const cacheKey = `userData_${currentUser.uid}`;
-                localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
-                updateProfileUI(userDataCache);
+                profileAvatar.src = userData.avatar;
+                profileUsername.textContent = userData.username;
+                profileBio.textContent = userData.bio;
+                profileVerified.style.display = userData.verify ? 'block' : 'none';
+                statSubscriptions.textContent = userData.subscriptions || 0;
+                statSubscribers.textContent = userData.subscribers || 0;
+                statFriends.textContent = userData.friends || 0;
+
+                localStorage.setItem(`profile_${currentUser.uid}`, JSON.stringify(userData));
             } catch (error) {
                 console.error('Ошибка загрузки профиля:', error);
                 throw error;
             }
         }
 
-        function updateProfileUI(userData) {
-            profileUsername.textContent = userData.username;
-            profileBio.textContent = userData.bio;
-            profileAvatar.src = userData.avatar;
-            statSubscriptions.textContent = userData.subscriptions;
-            statSubscribers.textContent = userData.subscribers;
-            statFriends.textContent = userData.friends || 0;
-            profileVerified.style.display = userData.verify ? 'block' : 'none';
+        // Загрузка постов пользователя
+        async function loadUserPosts() {
+            try {
+                const postsQuery = query(collection(db, 'posts'), where('uid', '==', currentUser.uid), orderBy('createdAt', 'desc'));
+                const querySnapshot = await getDocs(postsQuery);
+                userPosts.innerHTML = '';
+
+                for (const postDoc of querySnapshot.docs) {
+                    const postData = postDoc.data();
+                    const postId = postDoc.id;
+                    renderPost(postData, postId);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки постов пользователя:', error);
+                throw error;
+            }
         }
 
+        // Подписка на новые посты пользователя
+        function listenForUserPosts() {
+            if (unsubscribeSnapshot) unsubscribeSnapshot();
+
+            try {
+                const postsQuery = query(collection(db, 'posts'), where('uid', '==', currentUser.uid), orderBy('createdAt', 'desc'));
+                unsubscribeSnapshot = onSnapshot(postsQuery, (snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === 'added') {
+                            const postData = change.doc.data();
+                            const postId = change.doc.id;
+                            const existingPost = document.querySelector(`.post[data-id="${postId}"]`);
+                            if (!existingPost) {
+                                renderPost(postData, postId, true);
+                            }
+                        }
+                    });
+                }, (error) => {
+                    console.error('Ошибка подписки на посты пользователя:', error);
+                });
+            } catch (error) {
+                console.error('Ошибка настройки подписки на посты:', error);
+            }
+        }
+
+        // Обновление времени постов
+        function updatePostTimes() {
+            const posts = userPosts.querySelectorAll('.post');
+            posts.forEach(post => {
+                const createdAt = post.dataset.createdAt;
+                if (createdAt) {
+                    const timeElement = post.querySelector('.post-time');
+                    const diff = Date.now() - parseInt(createdAt);
+                    const seconds = Math.floor(diff / 1000);
+                    const minutes = Math.floor(seconds / 60);
+                    const hours = Math.floor(minutes / 60);
+                    const days = Math.floor(hours / 24);
+
+                    if (seconds < 60) {
+                        timeElement.textContent = `${seconds} сек назад`;
+                    } else if (minutes < 60) {
+                        timeElement.textContent = `${minutes} мин назад`;
+                    } else if (hours < 24) {
+                        timeElement.textContent = `${hours} ч назад`;
+                    } else {
+                        timeElement.textContent = `${days} дн назад`;
+                    }
+                }
+            });
+        }
+
+        setInterval(updatePostTimes, 1000);
+
+        // Загрузка аватара
+        profileAvatar.addEventListener('click', () => {
+            avatarUpload.click();
+        });
+
+        avatarUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                loadingOverlay.classList.add('active');
+                try {
+                    const imageUrl = await uploadToImgur(file);
+                    await updateDoc(doc(db, 'users', currentUser.uid), { avatar: imageUrl });
+                    profileAvatar.src = imageUrl;
+                    const cachedProfile = JSON.parse(localStorage.getItem(`profile_${currentUser.uid}`)) || {};
+                    cachedProfile.avatar = imageUrl;
+                    localStorage.setItem(`profile_${currentUser.uid}`, JSON.stringify(cachedProfile));
+                } catch (error) {
+                    console.error('Ошибка загрузки аватара:', error);
+                    alert('Не удалось загрузить аватар!');
+                } finally {
+                    loadingOverlay.classList.remove('active');
+                }
+            }
+        });
+
+        // Загрузка изображения на Imgur
         async function uploadToImgur(file) {
             const formData = new FormData();
             formData.append('image', file);
@@ -685,72 +881,73 @@
                     throw new Error('Ошибка загрузки изображения в Imgur');
                 }
             } catch (error) {
-                console.error('Imgur upload error:', error);
+                console.error('Ошибка загрузки Imgur:', error);
                 throw error;
             }
         }
 
-        profileAvatar.addEventListener('click', () => {
-            avatarUpload.click();
-        });
-
-        avatarUpload.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                loadingOverlay.classList.add('active');
-                try {
-                    const avatarUrl = await uploadToImgur(file);
-                    userDataCache.avatar = avatarUrl;
-                    await updateDoc(doc(db, 'users', currentUser.uid), { avatar: avatarUrl });
-                    const cacheKey = `userData_${currentUser.uid}`;
-                    localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
-                    profileAvatar.src = avatarUrl;
-                } catch (error) {
-                    alert('Ошибка загрузки аватара!');
-                    console.error('Ошибка загрузки аватара:', error);
-                } finally {
-                    loadingOverlay.classList.remove('active');
-                }
-            }
-        });
-
+        // Открытие модального окна редактирования профиля
         editProfileButton.addEventListener('click', () => {
-            modal.classList.add('active');
-            editUsername.value = userDataCache.username;
-            editBio.value = userDataCache.bio === 'О себе...' ? '' : userDataCache.bio;
+            const cachedProfile = JSON.parse(localStorage.getItem(`profile_${currentUser.uid}`)) || {};
+            editUsername.value = cachedProfile.username || 'Guest';
+            editBio.value = cachedProfile.bio || 'О себе...';
+            editProfileModal.classList.add('active');
         });
 
+        // Закрытие модального окна
         modalClose.addEventListener('click', () => {
-            modal.classList.remove('active');
+            editProfileModal.classList.remove('active');
         });
 
-        saveButton.addEventListener('click', async () => {
-            const newUsername = editUsername.value.trim();
-            const newBio = editBio.value.trim();
-            if (newUsername) {
-                loadingOverlay.classList.add('active');
-                try {
-                    const updatedData = {
-                        username: newUsername,
-                        bio: newBio || 'О себе...'
-                    };
-                    await updateDoc(doc(db, 'users', currentUser.uid), updatedData);
-                    userDataCache = { ...userDataCache, ...updatedData };
-                    const cacheKey = `userData_${currentUser.uid}`;
-                    localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
-                    updateProfileUI(userDataCache);
-                    modal.classList.remove('active');
-                } catch (error) {
-                    alert('Ошибка сохранения профиля!');
-                    console.error('Ошибка сохранения профиля:', error);
-                } finally {
-                    loadingOverlay.classList.remove('active');
-                }
-            } else {
-                alert('Логин не может быть пустым!');
+        // Сохранение профиля
+        saveProfile.addEventListener('click', async () => {
+            const username = editUsername.value.trim();
+            const bio = editBio.value.trim();
+
+            if (!username) {
+                alert('Имя пользователя не может быть пустым!');
+                return;
+            }
+
+            loadingOverlay.classList.add('active');
+            try {
+                const userRef = doc(db, 'users', currentUser.uid);
+                const updatedData = { username, bio };
+                await updateDoc(userRef, updatedData);
+
+                profileUsername.textContent = username;
+                profileBio.textContent = bio;
+
+                const cachedProfile = JSON.parse(localStorage.getItem(`profile_${currentUser.uid}`)) || {};
+                cachedProfile.username = username;
+                cachedProfile.bio = bio;
+                localStorage.setItem(`profile_${currentUser.uid}`, JSON.stringify(cachedProfile));
+
+                editProfileModal.classList.remove('active');
+            } catch (error) {
+                console.error('Ошибка сохранения профиля:', error);
+                alert('Не удалось сохранить профиль!');
+            } finally {
+                loadingOverlay.classList.remove('active');
             }
         });
 
+        // Навигация
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                const navText = item.querySelector('.nav-text').textContent;
+                if (navText === 'Главное') {
+                    if (unsubscribeSnapshot) unsubscribeSnapshot();
+                    window.location.href = 'index.html';
+                } else if (navText === 'Лидеры') {
+                    alert('Переход на страницу лидеров (заглушка)!');
+                }
+            });
+        });
+
+        // Обработчики кнопок настроек
         settingsButton.addEventListener('click', () => {
             alert('Настройки пока не реализованы!');
         });
@@ -760,32 +957,134 @@
         });
 
         logoutButton.addEventListener('click', async () => {
-            loadingOverlay.classList.add('active');
             try {
-                const cacheKey = `userData_${currentUser.uid}`;
-                localStorage.removeItem(cacheKey);
-                localStorage.removeItem(`posts_${currentUser.uid}`);
                 await signOut(auth);
+                if (unsubscribeSnapshot) unsubscribeSnapshot();
+                localStorage.removeItem(`profile_${currentUser.uid}`);
                 window.location.href = 'auth.html';
             } catch (error) {
-                alert('Ошибка при выходе!');
-                console.error('Ошибка при выходе:', error);
-            } finally {
-                loadingOverlay.classList.remove('active');
+                console.error('Ошибка выхода:', error);
+                alert('Не удалось выйти!');
             }
         });
 
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                navItems.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                const navText = item.querySelector('.nav-text').textContent;
-                if (navText === 'Главное') {
-                    window.location.href = 'index.html';
-                } else if (navText === 'Лидеры') {
-                    alert('Переход на страницу лидеров (заглушка)!');
-                }
+        // Рендеринг поста
+        function renderPost(postData, postId, prepend = false) {
+            const post = document.createElement('div');
+            post.classList.add('post');
+            post.dataset.createdAt = postData.createdAt;
+            post.dataset.id = postId;
+
+            const postHeader = document.createElement('div');
+            postHeader.classList.add('post-header');
+
+            const postAvatar = document.createElement('img');
+            postAvatar.classList.add('post-avatar');
+            postAvatar.src = profileAvatar.src;
+            postAvatar.alt = 'avatar';
+            postHeader.appendChild(postAvatar);
+
+            const headerInfo = document.createElement('div');
+            const postUsernameContainer = document.createElement('div');
+            postUsernameContainer.classList.add('post-username-container');
+            
+            const postUsernameElement = document.createElement('div');
+            postUsernameElement.classList.add('post-username');
+            postUsernameElement.textContent = profileUsername.textContent;
+            postUsernameContainer.appendChild(postUsernameElement);
+
+            if (profileVerified.style.display === 'block') {
+                const verifiedIcon = document.createElement('img');
+                verifiedIcon.classList.add('post-verified');
+                verifiedIcon.src = 'https://img.icons8.com/color/48/instagram-verification-badge.png';
+                verifiedIcon.alt = 'verified';
+                postUsernameContainer.appendChild(verifiedIcon);
+            }
+
+            headerInfo.appendChild(postUsernameContainer);
+
+            const postTime = document.createElement('div');
+            postTime.classList.add('post-time');
+            postTime.textContent = '0 сек назад';
+            headerInfo.appendChild(postTime);
+
+            postHeader.appendChild(headerInfo);
+            post.appendChild(postHeader);
+
+            if (postData.imageUrl) {
+                const postImage = document.createElement('img');
+                postImage.classList.add('post-image');
+                postImage.src = postData.imageUrl;
+                postImage.alt = 'post image';
+                post.appendChild(postImage);
+            }
+
+            if (postData.title) {
+                const postTitleElement = document.createElement('div');
+                postTitleElement.classList.add('post-title');
+                postTitleElement.textContent = postData.title;
+                post.appendChild(postTitleElement);
+            }
+
+            if (postData.text) {
+                const postTextElement = document.createElement('div');
+                postTextElement.classList.add('post-text');
+                postTextElement.textContent = postData.text;
+                post.appendChild(postTextElement);
+            }
+
+            const postActions = document.createElement('div');
+            postActions.classList.add('post-actions');
+
+            const likeAction = document.createElement('div');
+            likeAction.classList.add('action-item');
+            const likeIcon = document.createElement('img');
+            likeIcon.src = 'https://img.icons8.com/ios/50/ffffff/like--v1.png';
+            likeIcon.alt = 'like';
+            const likeCount = document.createElement('span');
+            likeCount.textContent = '0';
+            likeAction.appendChild(likeIcon);
+            likeAction.appendChild(likeCount);
+            postActions.appendChild(likeAction);
+
+            const dislikeAction = document.createElement('div');
+            dislikeAction.classList.add('action-item');
+            const dislikeIcon = document.createElement('img');
+            dislikeIcon.src = 'https://img.icons8.com/ios/50/ffffff/dislike--v1.png';
+            dislikeIcon.alt = 'dislike';
+            const dislikeCount = document.createElement('span');
+            dislikeCount.textContent = '0';
+            dislikeAction.appendChild(dislikeIcon);
+            dislikeAction.appendChild(dislikeCount);
+            postActions.appendChild(dislikeAction);
+
+            const commentAction = document.createElement('div');
+            commentAction.classList.add('action-item');
+            const commentIcon = document.createElement('img');
+            commentIcon.src = 'https://img.icons8.com/ios/50/ffffff/comments--v1.png';
+            commentIcon.alt = 'comment';
+            const commentCount = document.createElement('span');
+            commentCount.textContent = postData.comments || 0;
+            commentAction.appendChild(commentIcon);
+            commentAction.appendChild(commentCount);
+            postActions.appendChild(commentAction);
+
+            post.appendChild(postActions);
+
+            commentAction.addEventListener('click', () => {
+                alert('Комментарии пока не реализованы!');
             });
+
+            if (prepend) {
+                userPosts.prepend(post);
+            } else {
+                userPosts.appendChild(post);
+            }
+        }
+
+        // Отписка перед закрытием страницы
+        window.addEventListener('beforeunload', () => {
+            if (unsubscribeSnapshot) unsubscribeSnapshot();
         });
     </script>
 </body>
