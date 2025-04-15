@@ -435,6 +435,10 @@
                         <div class="stat-number" id="stat-subscribers">0</div>
                         <div class="stat-label">Подписчики</div>
                     </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="stat-friends">0</div>
+                        <div class="stat-label">Друзья</div>
+                    </div>
                 </div>
                 <img class="edit-profile-button" id="edit-profile-button" src="https://img.icons8.com/ios/50/ffffff/edit--v1.png" alt="edit"/>
             </div>
@@ -486,6 +490,7 @@
         const profileBio = document.querySelector('#profile-bio');
         const statSubscriptions = document.querySelector('#stat-subscriptions');
         const statSubscribers = document.querySelector('#stat-subscribers');
+        const statFriends = document.querySelector('#stat-friends');
         const editProfileButton = document.querySelector('#edit-profile-button');
         const settingsButton = document.querySelector('#settings-button');
         const favoritesButton = document.querySelector('#favorites-button');
@@ -500,6 +505,7 @@
 
         const IMGUR_CLIENT_ID = '8ea63c636bd153e';
         let currentUser = null;
+        let userDataCache = null;
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -519,6 +525,18 @@
         });
 
         async function loadProfile() {
+            const cacheKey = `userData_${currentUser.uid}`;
+            const cachedData = localStorage.getItem(cacheKey);
+
+            if (cachedData) {
+                userDataCache = JSON.parse(cachedData);
+                updateProfileUI(userDataCache);
+            } else {
+                await fetchProfileData();
+            }
+        }
+
+        async function fetchProfileData() {
             try {
                 const userDocRef = doc(db, 'users', currentUser.uid);
                 const userDoc = await getDoc(userDocRef);
@@ -528,25 +546,33 @@
                     avatar: 'https://img.icons8.com/ios/50/ffffff/user.png',
                     subscriptions: 0,
                     subscribers: 0,
+                    friends: 0,
                     verify: false
                 };
 
-                let userData = defaultData;
+                userDataCache = defaultData;
                 if (userDoc.exists()) {
-                    userData = { ...defaultData, ...userDoc.data() };
+                    userDataCache = { ...defaultData, ...userDoc.data() };
                 } else {
                     await setDoc(userDocRef, defaultData);
                 }
 
-                profileUsername.textContent = userData.username;
-                profileBio.textContent = userData.bio;
-                profileAvatar.src = userData.avatar;
-                statSubscriptions.textContent = userData.subscriptions;
-                statSubscribers.textContent = userData.subscribers;
+                const cacheKey = `userData_${currentUser.uid}`;
+                localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
+                updateProfileUI(userDataCache);
             } catch (error) {
                 console.error('Ошибка загрузки профиля:', error);
                 throw error;
             }
+        }
+
+        function updateProfileUI(userData) {
+            profileUsername.textContent = userData.username;
+            profileBio.textContent = userData.bio;
+            profileAvatar.src = userData.avatar;
+            statSubscriptions.textContent = userData.subscriptions;
+            statSubscribers.textContent = userData.subscribers;
+            statFriends.textContent = userData.friends || 0;
         }
 
         async function uploadToImgur(file) {
@@ -585,7 +611,10 @@
                 loadingOverlay.classList.add('active');
                 try {
                     const avatarUrl = await uploadToImgur(file);
+                    userDataCache.avatar = avatarUrl;
                     await updateDoc(doc(db, 'users', currentUser.uid), { avatar: avatarUrl });
+                    const cacheKey = `userData_${currentUser.uid}`;
+                    localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
                     profileAvatar.src = avatarUrl;
                 } catch (error) {
                     alert('Ошибка загрузки аватара!');
@@ -598,8 +627,8 @@
 
         editProfileButton.addEventListener('click', () => {
             modal.classList.add('active');
-            editUsername.value = profileUsername.textContent;
-            editBio.value = profileBio.textContent === 'О себе...' ? '' : profileBio.textContent;
+            editUsername.value = userDataCache.username;
+            editBio.value = userDataCache.bio === 'О себе...' ? '' : userDataCache.bio;
         });
 
         modalClose.addEventListener('click', () => {
@@ -612,12 +641,15 @@
             if (newUsername) {
                 loadingOverlay.classList.add('active');
                 try {
-                    await updateDoc(doc(db, 'users', currentUser.uid), {
+                    const updatedData = {
                         username: newUsername,
                         bio: newBio || 'О себе...'
-                    });
-                    profileUsername.textContent = newUsername;
-                    profileBio.textContent = newBio || 'О себе...';
+                    };
+                    await updateDoc(doc(db, 'users', currentUser.uid), updatedData);
+                    userDataCache = { ...userDataCache, ...updatedData };
+                    const cacheKey = `userData_${currentUser.uid}`;
+                    localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
+                    updateProfileUI(userDataCache);
                     modal.classList.remove('active');
                 } catch (error) {
                     alert('Ошибка сохранения профиля!');
@@ -641,6 +673,8 @@
         logoutButton.addEventListener('click', async () => {
             loadingOverlay.classList.add('active');
             try {
+                const cacheKey = `userData_${currentUser.uid}`;
+                localStorage.removeItem(cacheKey);
                 await signOut(auth);
                 window.location.href = 'auth.html';
             } catch (error) {
