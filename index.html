@@ -581,6 +581,13 @@
             margin-top: 4px;
             max-width: 90%;
             word-wrap: break-word;
+            background: rgba(50, 50, 100, 0.2);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(100, 100, 150, 0.3);
+            width: 100%;
+            max-width: 260px;
+            line-height: 1.2;
         }
         .cooldown-modal-content {
             display: flex;
@@ -709,7 +716,6 @@
             <div class="user-info">
                 <div class="username-container">
                     <h2 id="avatar-modal-username">Пользователь</h2>
-                    <img id="avatar-modal-verified" class="post-verified" src="https://img.icons8.com/color/48/instagram-verification-badge.png" alt="verified" style="display: none;"/>
                 </div>
                 <div class="user-bio" id="avatar-modal-bio"></div>
                 <div class="user-stats">
@@ -737,7 +743,6 @@
     </div>
     <div class="modal" id="cooldown-modal">
         <div class="modal-content cooldown-modal-content">
-            <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
             <p class="cooldown-message" id="cooldown-message">Подождите перед созданием нового поста!</p>
             <button class="cooldown-close-button" id="cooldown-close-button">Закрыть</button>
         </div>
@@ -763,7 +768,6 @@
         const avatarModal = document.querySelector('#avatar-modal');
         const avatarModalImage = document.querySelector('#avatar-modal-image');
         const avatarModalUsername = document.querySelector('#avatar-modal-username');
-        const avatarModalVerified = document.querySelector('#avatar-modal-verified');
         const avatarModalBio = document.querySelector('#avatar-modal-bio');
         const statSubscriptions = document.querySelector('#stat-subscriptions');
         const statSubscribers = document.querySelector('#stat-subscribers');
@@ -780,26 +784,15 @@
         let currentUser = null;
         let unsubscribeSnapshot = null;
         let lastPostTimestamp = null;
-        const POST_COOLDOWN = 5 * 60 * 1000; // 5 минут в миллисекундах
+        const POST_COOLDOWN = 5 * 60 * 1000;
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 loadingOverlay.classList.add('active');
                 try {
-                    const cachedPosts = localStorage.getItem(`posts_${currentUser.uid}`);
-                    if (cachedPosts) {
-                        const { posts, users } = JSON.parse(cachedPosts);
-                        posts.forEach((postData, index) => {
-                            const userData = users[postData.uid];
-                            renderPost(postData, userData, postData.id);
-                        });
-                        listenForNewPosts();
-                    } else {
-                        await loadPosts();
-                        listenForNewPosts();
-                    }
-                    // Загрузка времени последнего поста
+                    await loadPosts();
+                    listenForNewPosts();
                     lastPostTimestamp = localStorage.getItem(`lastPost_${currentUser.uid}`) || null;
                 } catch (error) {
                     console.error('Ошибка загрузки постов:', error);
@@ -1116,7 +1109,6 @@
                 cachedData.users[currentUser.uid] = userData;
                 cachedData.posts.unshift(postData);
                 localStorage.setItem(`posts_${currentUser.uid}`, JSON.stringify(cachedData));
-                // Сохраняем время публикации поста
                 lastPostTimestamp = Date.now();
                 localStorage.setItem(`lastPost_${currentUser.uid}`, lastPostTimestamp);
             } catch (error) {
@@ -1135,6 +1127,20 @@
             imagePreview.src = '';
         }
 
+        async function fetchUserData(uid) {
+            const userRef = doc(db, 'users', uid);
+            const userDoc = await getDoc(userRef);
+            return userDoc.exists() ? userDoc.data() : {
+                username: 'Guest',
+                avatar: 'https://img.icons8.com/ios/50/ffffff/user.png',
+                verify: false,
+                bio: '',
+                subscriptions: 0,
+                subscribers: 0,
+                friends: 0
+            };
+        }
+
         function renderPost(postData, userData, postId, prepend = false) {
             const existingPost = document.querySelector(`.post[data-id="${postId}"]`);
             if (existingPost) return;
@@ -1151,14 +1157,14 @@
             postAvatar.classList.add('post-avatar');
             postAvatar.src = userData.avatar || 'https://img.icons8.com/ios/50/ffffff/user.png';
             postAvatar.alt = 'avatar';
-            postAvatar.addEventListener('click', () => {
-                avatarModalImage.src = postAvatar.src;
-                avatarModalUsername.textContent = userData.username || 'Guest';
-                avatarModalVerified.style.display = userData.verify ? 'inline-block' : 'none';
-                avatarModalBio.textContent = userData.bio || 'Биография не указана';
-                statSubscriptions.textContent = userData.subscriptions || 0;
-                statSubscribers.textContent = userData.subscribers || 0;
-                statFriends.textContent = userData.friends || 0;
+            postAvatar.addEventListener('click', async () => {
+                const freshUserData = await fetchUserData(postData.uid);
+                avatarModalImage.src = freshUserData.avatar;
+                avatarModalUsername.textContent = freshUserData.username || 'Guest';
+                avatarModalBio.textContent = freshUserData.bio || 'Биография не указана';
+                statSubscriptions.textContent = freshUserData.subscriptions || 0;
+                statSubscribers.textContent = freshUserData.subscribers || 0;
+                statFriends.textContent = freshUserData.friends || 0;
                 avatarModal.classList.add('active');
             });
             postHeader.appendChild(postAvatar);
