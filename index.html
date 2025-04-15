@@ -641,14 +641,25 @@
 
         const IMGUR_CLIENT_ID = '8ea63c636bd153e';
         let currentUser = null;
+        let unsubscribeSnapshot = null;
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 loadingOverlay.classList.add('active');
                 try {
-                    await loadPosts();
-                    listenForNewPosts();
+                    const cachedPosts = localStorage.getItem(`posts_${currentUser.uid}`);
+                    if (cachedPosts) {
+                        const { posts, users } = JSON.parse(cachedPosts);
+                        posts.forEach((postData, index) => {
+                            const userData = users[postData.uid];
+                            renderPost(postData, userData, postData.id);
+                        });
+                        listenForNewPosts();
+                    } else {
+                        await loadPosts();
+                        listenForNewPosts();
+                    }
                 } catch (error) {
                     console.error('Ошибка загрузки постов:', error);
                     alert('Не удалось загрузить посты. Проверьте настройки Firestore.');
@@ -661,38 +672,63 @@
         });
 
         async function loadPosts() {
-            content.innerHTML = '';
             const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
             const querySnapshot = await getDocs(postsQuery);
+            const posts = [];
+            const users = {};
+
             for (const postDoc of querySnapshot.docs) {
                 const postData = postDoc.data();
                 const postId = postDoc.id;
+                postData.id = postId;
+
                 try {
-                    const userRef = doc(db, 'users', postData.uid);
-                    const userDoc = await getDoc(userRef);
-                    const userData = userDoc.exists() ? userDoc.data() : { username: 'Guest', avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', verify: false };
-                    renderPost(postData, userData, postId);
+                    if (!users[postData.uid]) {
+                        const userRef = doc(db, 'users', postData.uid);
+                        const userDoc = await getDoc(userRef);
+                        users[postData.uid] = userDoc.exists() ? userDoc.data() : { username: 'Guest', avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', verify: false };
+                    }
+                    renderPost(postData, users[postData.uid], postId);
+                    posts.push(postData);
                 } catch (error) {
                     console.error(`Ошибка загрузки профиля для поста ${postId}:`, error);
                 }
             }
+
+            localStorage.setItem(`posts_${currentUser.uid}`, JSON.stringify({ posts, users }));
         }
 
         function listenForNewPosts() {
+            if (unsubscribeSnapshot) unsubscribeSnapshot();
+
             const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-            onSnapshot(postsQuery, (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
+            unsubscribeSnapshot = onSnapshot(postsQuery, async (snapshot) => {
+                const cachedData = JSON.parse(localStorage.getItem(`posts_${currentUser.uid}`)) || { posts: [], users: {} };
+                const { posts, users } = cachedData;
+
+                for (const change of snapshot.docChanges()) {
                     if (change.type === 'added') {
                         const postData = change.doc.data();
                         const postId = change.doc.id;
-                        getDoc(doc(db, 'users', postData.uid)).then(userDoc => {
-                            const userData = userDoc.exists() ? userDoc.data() : { username: 'Guest', avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', verify: false };
-                            renderPost(postData, userData, postId, true);
-                        }).catch(error => {
+                        postData.id = postId;
+
+                        const existingPost = posts.find(p => p.id === postId);
+                        if (existingPost) continue;
+
+                        try {
+                            if (!users[postData.uid]) {
+                                const userRef = doc(db, 'users', postData.uid);
+                                const userDoc = await getDoc(userRef);
+                                users[postData.uid] = userDoc.exists() ? userDoc.data() : { username: 'Guest', avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', verify: false };
+                            }
+                            renderPost(postData, users[postData.uid], postId, true);
+                            posts.unshift(postData);
+                            localStorage.setItem(`posts_${currentUser.uid}`, JSON.stringify({ posts, users }));
+                        } catch (error) {
                             console.error(`Ошибка загрузки профиля для нового поста ${postId}:`, error);
-                        });
+                        }
                     }
-                });
+                }
             }, (error) => {
                 console.error('Ошибка подписки на новые посты:', error);
             });
@@ -757,6 +793,7 @@
                 item.classList.add('active');
                 const navText = item.querySelector('.nav-text').textContent;
                 if (navText === 'Профиль') {
+                    if (unsubscribeSnapshot) unsubscribeSnapshot();
                     window.location.href = 'profile.html';
                 } else if (navText === 'Лидеры') {
                     alert('Переход на страницу лидеров (заглушка)!');
@@ -888,9 +925,18 @@
             };
 
             try {
-                await addDoc(collection(db, 'posts'), postData);
+                const docRef = await addDoc(collection(db, 'posts'), postData);
+                postData.id = docRef.id;
                 modal.classList.remove('active');
                 resetModal();
+
+                const cachedData = JSON.parse(localStorage.getItem(`posts_${currentUser.uid}`)) || { posts: [], users: {} };
+                const userRef = doc(db, 'users', currentUser.uid);
+                const userDoc = await getDoc(userRef);
+                const userData = userDoc.exists() ? userDoc.data() : { username: 'Guest', avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', verify: false };
+                cachedData.users[currentUser.uid] = userData;
+                cachedData.posts.unshift(postData);
+                localStorage.setItem(`posts_${currentUser.uid}`, JSON.stringify(cachedData));
             } catch (error) {
                 console.error('Ошибка публикации поста:', error);
                 alert('Ошибка публикации поста!');
@@ -1026,6 +1072,10 @@
                 content.appendChild(post);
             }
         }
+
+        window.addEventListener('beforeunload', () => {
+            if (unsubscribeSnapshot) unsubscribeSnapshot();
+        });
     </script>
 </body>
 </html>
