@@ -418,7 +418,6 @@
             filter: brightness(1);
         }
 
-        /* Адаптивные стили для разных устройств */
         @media (min-width: 481px) and (max-width: 767px) {
             .container {
                 max-width: 90%;
@@ -601,6 +600,7 @@
                 loadingOverlay.classList.add('active');
                 try {
                     await loadProfile();
+                    listenForProfileUpdates();
                 } catch (error) {
                     console.error('Ошибка инициализации профиля:', error);
                     alert('Не удалось загрузить профиль. Попробуйте снова.');
@@ -613,15 +613,7 @@
         });
 
         async function loadProfile() {
-            const cacheKey = `userData_${currentUser.uid}`;
-            const cachedData = localStorage.getItem(cacheKey);
-
-            if (cachedData) {
-                userDataCache = JSON.parse(cachedData);
-                updateProfileUI(userDataCache);
-            } else {
-                await fetchProfileData();
-            }
+            await fetchProfileData();
         }
 
         async function fetchProfileData() {
@@ -654,12 +646,26 @@
             }
         }
 
+        function listenForProfileUpdates() {
+            const userDocRef = doc(db, 'users', currentUser.uid);
+            onSnapshot(userDocRef, (doc) => {
+                if (doc.exists()) {
+                    userDataCache = doc.data();
+                    updateProfileUI(userDataCache);
+                    const cacheKey = `userData_${currentUser.uid}`;
+                    localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
+                }
+            }, (error) => {
+                console.error('Ошибка подписки на обновления профиля:', error);
+            });
+        }
+
         function updateProfileUI(userData) {
-            profileUsername.textContent = userData.username;
-            profileBio.textContent = userData.bio;
-            profileAvatar.src = userData.avatar;
-            statSubscriptions.textContent = userData.subscriptions;
-            statSubscribers.textContent = userData.subscribers;
+            profileUsername.textContent = userData.username || 'Guest';
+            profileBio.textContent = userData.bio || 'О себе...';
+            profileAvatar.src = userData.avatar || 'https://img.icons8.com/ios/50/ffffff/user.png';
+            statSubscriptions.textContent = userData.subscriptions || 0;
+            statSubscribers.textContent = userData.subscribers || 0;
             statFriends.textContent = userData.friends || 0;
             profileVerified.style.display = userData.verify ? 'block' : 'none';
         }
@@ -699,15 +705,17 @@
             if (file) {
                 loadingOverlay.classList.add('active');
                 try {
-                    const avatarUrl = await uploadToImgur(file);
-                    userDataCache.avatar = avatarUrl;
-                    await updateDoc(doc(db, 'users', currentUser.uid), { avatar: avatarUrl });
+                    const imageUrl = await uploadToImgur(file);
+                    const userDocRef = doc(db, 'users', currentUser.uid);
+                    await updateDoc(userDocRef, { avatar: imageUrl });
+                    userDataCache.avatar = imageUrl;
+                    updateProfileUI(userDataCache);
                     const cacheKey = `userData_${currentUser.uid}`;
                     localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
-                    profileAvatar.src = avatarUrl;
+                    localStorage.removeItem(`posts_${currentUser.uid}`); // Очистка кэша постов
                 } catch (error) {
-                    alert('Ошибка загрузки аватара!');
                     console.error('Ошибка загрузки аватара:', error);
+                    alert('Не удалось загрузить аватар.');
                 } finally {
                     loadingOverlay.classList.remove('active');
                 }
@@ -715,9 +723,9 @@
         });
 
         editProfileButton.addEventListener('click', () => {
+            editUsername.value = userDataCache.username || '';
+            editBio.value = userDataCache.bio || '';
             modal.classList.add('active');
-            editUsername.value = userDataCache.username;
-            editBio.value = userDataCache.bio === 'О себе...' ? '' : userDataCache.bio;
         });
 
         modalClose.addEventListener('click', () => {
@@ -727,27 +735,32 @@
         saveButton.addEventListener('click', async () => {
             const newUsername = editUsername.value.trim();
             const newBio = editBio.value.trim();
-            if (newUsername) {
-                loadingOverlay.classList.add('active');
-                try {
-                    const updatedData = {
-                        username: newUsername,
-                        bio: newBio || 'О себе...'
-                    };
-                    await updateDoc(doc(db, 'users', currentUser.uid), updatedData);
-                    userDataCache = { ...userDataCache, ...updatedData };
-                    const cacheKey = `userData_${currentUser.uid}`;
-                    localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
-                    updateProfileUI(userDataCache);
-                    modal.classList.remove('active');
-                } catch (error) {
-                    alert('Ошибка сохранения профиля!');
-                    console.error('Ошибка сохранения профиля:', error);
-                } finally {
-                    loadingOverlay.classList.remove('active');
-                }
-            } else {
+
+            if (!newUsername) {
                 alert('Логин не может быть пустым!');
+                return;
+            }
+
+            loadingOverlay.classList.add('active');
+            try {
+                const userDocRef = doc(db, 'users', currentUser.uid);
+                const updates = {
+                    username: newUsername,
+                    bio: newBio || 'О себе...'
+                };
+                await updateDoc(userDocRef, updates);
+                userDataCache.username = newUsername;
+                userDataCache.bio = newBio || 'О себе...';
+                updateProfileUI(userDataCache);
+                const cacheKey = `userData_${currentUser.uid}`;
+                localStorage.setItem(cacheKey, JSON.stringify(userDataCache));
+                localStorage.removeItem(`posts_${currentUser.uid}`); // Очистка кэша постов
+                modal.classList.remove('active');
+            } catch (error) {
+                console.error('Ошибка сохранения профиля:', error);
+                alert('Не удалось сохранить изменения.');
+            } finally {
+                loadingOverlay.classList.remove('active');
             }
         });
 
@@ -760,18 +773,13 @@
         });
 
         logoutButton.addEventListener('click', async () => {
-            loadingOverlay.classList.add('active');
             try {
-                const cacheKey = `userData_${currentUser.uid}`;
-                localStorage.removeItem(cacheKey);
-                localStorage.removeItem(`posts_${currentUser.uid}`);
                 await signOut(auth);
+                localStorage.clear(); // Очистка всего кэша при выходе
                 window.location.href = 'auth.html';
             } catch (error) {
-                alert('Ошибка при выходе!');
-                console.error('Ошибка при выходе:', error);
-            } finally {
-                loadingOverlay.classList.remove('active');
+                console.error('Ошибка выхода:', error);
+                alert('Не удалось выйти.');
             }
         });
 
