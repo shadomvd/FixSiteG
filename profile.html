@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FixSite - Соцсеть</title>
+    <title>FixSite - Профиль</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -40,7 +40,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            overflow-y: auto; /* Разрешаем прокрутку контента */
+            overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
         .nav-bar {
@@ -68,206 +68,112 @@
             gap: 8px;
             position: relative;
         }
-        .nav-bar img.plus-icon {
-            position: absolute;
-            right: 16px;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            transition: transform 0.2s, filter 0.2s;
-            filter: brightness(1);
-        }
-        .nav-bar img.plus-icon:hover {
-            transform: scale(1.1);
-            filter: brightness(1.2) drop-shadow(0 0 8px rgba(100, 100, 255, 0.5));
-        }
-        .nav-bar img.plus-icon:active {
-            animation: spinAndGlow 0.6s ease forwards;
-        }
-        @keyframes spinAndGlow {
-            0% {
-                transform: scale(1) rotate(0deg);
-                filter: brightness(1) drop-shadow(0 0 0 rgba(100, 100, 255, 0));
-            }
-            50% {
-                transform: scale(1.3) rotate(180deg);
-                filter: brightness(1.5) drop-shadow(0 0 12px rgba(100, 100, 255, 0.8));
-            }
-            100% {
-                transform: scale(1) rotate(360deg);
-                filter: brightness(1) drop-shadow(0 0 0 rgba(100, 100, 255, 0));
-            }
-        }
-        .verified-icon {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .verified-icon:hover {
-            transform: scale(1.1);
-        }
-        .verified-tooltip {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(145deg, #333344, #222233);
-            color: #ffffff;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            white-space: nowrap;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-            z-index: 10;
-            opacity: 0;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        }
-        .verified-icon:hover + .verified-tooltip,
-        .verified-icon:active + .verified-tooltip,
-        .verified-icon.show-tooltip + .verified-tooltip {
-            display: block;
-            opacity: 1;
-            transform: translateX(-50%) translateY(4px);
-        }
-        .search-container {
-            position: relative;
-            width: 100%;
-            max-width: 280px;
-            margin: 0 auto 20px;
-        }
-        .search-input {
-            width: 100%;
-            padding: 12px 40px 12px 16px;
-            border-radius: 10px;
-            border: 1px solid #444455;
-            background: linear-gradient(145deg, #333344, #222233);
-            font-size: 15px;
-            color: #ffffff;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            outline: none;
-            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-            user-select: auto;
-        }
-        .search-input:focus {
-            border-color: #6464ff;
-            box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
-            transform: scale(1.02);
-        }
-        .search-icon {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            filter: brightness(0.8);
-            transition: filter 0.2s;
-        }
-        .search-input:focus + .search-icon {
-            filter: brightness(1);
-        }
-        .not-found-card {
-            display: none;
-            text-align: center;
+        .profile-section {
+            background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
             padding: 20px;
-            background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            margin: 0 auto 20px;
-            width: 90%;
-            opacity: 0;
-            animation: slideIn 0.4s ease forwards;
-            border: 1px solid rgba(100, 100, 150, 0.2);
-        }
-        .not-found-card.active {
-            display: block;
-            opacity: 1;
-        }
-        .not-found-card img {
-            width: 36px;
-            height: 36px;
-            margin-bottom: 10px;
-            filter: brightness(1);
-        }
-        .not-found-card p {
-            font-size: 15px;
-            font-weight: 500;
-            color: #aaaaaa;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes immerseIn {
-            0% {
-                opacity: 0;
-                transform: translateY(-50px) scale(0.95);
-                filter: blur(4px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0);
-            }
-        }
-        .navigation {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            max-width: 480px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            justify-content: space-around;
-            background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
-            padding: 10px 0;
-            border-radius: 12px 12px 0 0;
-            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.3);
-            z-index: 100;
-            border-top: 1px solid rgba(100, 100, 150, 0.2);
-        }
-        .nav-item {
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), inset 0 0 8px rgba(100, 100, 255, 0.1);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            color: #aaaaaa;
+            gap: 8px;
+            border: 2px solid rgba(100, 100, 150, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 20%, rgba(100, 100, 255, 0.3), transparent 70%);
+            opacity: 0.4;
+            z-index: 0;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #1a1a2a;
+            border: 3px solid #6464ff;
             cursor: pointer;
-            width: 33.33%;
-            padding: 8px;
-            transition: color 0.2s, transform 0.2s;
+            z-index: 1;
         }
-        .nav-item:hover {
+        .avatar-upload {
+            display: none;
+        }
+        .profile-username-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            z-index: 1;
+            width: 100%;
+            max-width: 250px;
+        }
+        .profile-username {
+            font-size: 18px;
+            font-weight: 600;
             color: #ffffff;
+            text-align: center;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.3px;
         }
-        .nav-item:active {
-            transform: scale(0.95);
+        .profile-bio {
+            font-size: 13px;
+            font-weight: 400;
+            color: #c9d1d9;
+            text-align: center;
+            max-width: 100%;
+            word-wrap: break-word;
+            z-index: 1;
+            background: rgba(50, 50, 100, 0.2);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(100, 100, 150, 0.3);
+            width: 100%;
+            max-width: 250px;
+            line-height: 1.3;
         }
-        .nav-item img {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 4px;
-            filter: brightness(0.5);
-            transition: filter 0.2s;
+        .profile-stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            padding: 12px 0;
+            border-top: 1px solid rgba(100, 100, 150, 0.3);
+            border-bottom: 1px solid rgba(100, 100, 150, 0.3);
+            z-index: 1;
         }
-        .nav-item:hover img {
-            filter: brightness(1);
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
         }
-        .nav-text {
-            font-size: 11px;
-            font-weight: 500;
-        }
-        .nav-item.active {
+        .stat-number {
+            font-size: 16px;
+            font-weight: 600;
             color: #6464ff;
         }
-        .nav-item.active img {
-            filter: brightness(1);
+        .stat-label {
+            font-size: 12px;
+            font-weight: 400;
+            color: #8b949e;
         }
-        .post {
+        .edit-profile-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            filter: brightness(0.8);
+            z-index: 2;
+        }
+        .settings-section {
             background: linear-gradient(145deg, #222233, #1a1a2a);
             padding: 16px;
             border-radius: 10px;
@@ -275,102 +181,43 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            position: relative;
             border: 0.5px solid rgba(100, 100, 150, 0.2);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            animation: immerseIn 0.5s ease forwards;
         }
-        .post:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 16px rgba(100, 100, 255, 0.2);
-        }
-        .post-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        .post-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: #1a1a2a;
-            border: 1px solid #444455;
-        }
-        .post-username-container {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .post-username {
-            font-size: 14px;
-            font-weight: 600;
-            color: #c9d1d9;
-        }
-        .post-verified {
-            width: 16px;
-            height: 16px;
-        }
-        .post-time {
-            font-size: 11px;
-            color: #8b949e;
-            margin-top: 3px;
-        }
-        .post-image {
+        .settings-button {
             width: 100%;
-            max-height: 200px;
-            object-fit: cover;
-            background: #1a1a2a;
+            padding: 12px;
+            background: linear-gradient(145deg, #333344, #222233);
+            border: none;
             border-radius: 8px;
-            border: 1px solid #303044;
-        }
-        .post-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #ffffff;
-            line-height: 1.4;
-        }
-        .post-text {
-            font-size: 14px;
-            font-weight: 400;
             color: #c9d1d9;
-            line-height: 1.5;
-        }
-        .post-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding-top: 10px;
-            border-top: 1px solid #303044;
-        }
-        .action-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            font-size: 15px;
+            font-weight: 500;
             cursor: pointer;
-            color: #8b949e;
-            font-size: 13px;
-            transition: color 0.2s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        .action-item img {
+        .settings-button img {
             width: 20px;
             height: 20px;
-            filter: brightness(0.7);
-            transition: filter 0.2s, transform 0.2s;
+            filter: brightness(0.8);
+            transition: filter 0.2s;
         }
-        .action-item:hover {
+        .settings-button:hover {
+            background: linear-gradient(145deg, #3a3a4a, #2a2a3a);
             color: #ffffff;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(100, 100, 255, 0.3);
         }
-        .action-item:hover img {
+        .settings-button:hover img {
             filter: brightness(1);
-            transform: scale(1.15);
         }
-        .action-item.active {
-            color: #6464ff;
-        }
-        .action-item.active img {
-            filter: brightness(1);
+        .settings-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
         .modal {
             display: none;
@@ -451,62 +298,7 @@
             border-color: #6464ff;
             box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
         }
-        .image-upload {
-            width: 100%;
-            height: 100px;
-            border: 2px dashed #303044;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 12px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            background: #1a1a2a;
-            transition: border-color 0.2s, background 0.2s;
-            animation: fadeInElement 0.5s ease forwards;
-        }
-        .image-upload:hover {
-            border-color: #6464ff;
-            background: #222233;
-        }
-        .image-upload img.placeholder {
-            width: 36px;
-            height: 36px;
-            filter: brightness(0.7);
-            transition: transform 0.3s ease;
-        }
-        .image-upload:hover img.placeholder {
-            transform: scale(1.1);
-        }
-        .image-upload p {
-            font-size: 12px;
-            color: #8b949e;
-            margin-top: 6px;
-        }
-        .image-upload input[type="file"] {
-            display: none;
-        }
-        .image-preview {
-            display: none;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: #1a1a2a;
-        }
-        .image-upload.has-image .placeholder,
-        .image-upload.has-image p {
-            display: none;
-        }
-        .image-upload.has-image .image-preview {
-            display: block;
-        }
-        .publish-button {
+        .save-button {
             width: 100%;
             padding: 10px;
             background: linear-gradient(145deg, #6464ff, #4b4bff);
@@ -520,12 +312,12 @@
             transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
             animation: fadeInElement 0.5s ease forwards;
         }
-        .publish-button:hover {
+        .save-button:hover {
             background: linear-gradient(145deg, #5a5aff, #4141ff);
             transform: scale(1.02);
             box-shadow: 0 4px 15px rgba(100, 100, 255, 0.5);
         }
-        .publish-button:active {
+        .save-button:active {
             transform: scale(0.98);
             box-shadow: 0 2px 10px rgba(100, 100, 255, 0.4);
         }
@@ -560,6 +352,60 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .navigation {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            max-width: 480px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: space-around;
+            background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
+            padding: 10px 0;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            border-top: 1px solid rgba(100, 100, 150, 0.2);
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #aaaaaa;
+            cursor: pointer;
+            width: 33.33%;
+            padding: 8px;
+            transition: color 0.2s, transform 0.2s;
+        }
+        .nav-item:hover {
+            color: #ffffff;
+        }
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+        .nav-item img {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            filter: brightness(0.5);
+            transition: filter 0.2s;
+        }
+        .nav-item:hover img {
+            filter: brightness(1);
+        }
+        .nav-text {
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .nav-item.active {
+            color: #6464ff;
+        }
+        .nav-item.active img {
+            filter: brightness(1);
+        }
     </style>
 </head>
 <body>
@@ -569,228 +415,140 @@
     <div class="container">
         <div class="nav-bar">
             <div class="nav-bar-title">
-                FixSite
-                <img class="verified-icon" src="https://img.icons8.com/color/48/instagram-verification-badge.png" alt="verified"/>
-                <span class="verified-tooltip">Проект верифицирован</span>
+                Профиль
             </div>
-            <img class="plus-icon" src="https://img.icons8.com/ios/50/ffffff/plus--v1.png" alt="plus--v1"/>
         </div>
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="Поиск...">
-            <img class="search-icon" src="https://img.icons8.com/ios/50/ffffff/search--v1.png" alt="search"/>
+        <div class="content">
+            <div class="profile-section">
+                <img class="profile-avatar" id="profile-avatar" src="https://img.icons8.com/ios/50/ffffff/user.png" alt="avatar"/>
+                <input type="file" id="avatar-upload" class="avatar-upload" accept="image/*">
+                <div class="profile-username-container">
+                    <div class="profile-username" id="profile-username">Guest</div>
+                    <div class="profile-bio" id="profile-bio">О себе...</div>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="stat-subscriptions">0</div>
+                        <div class="stat-label">Подписки</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="stat-subscribers">0</div>
+                        <div class="stat-label">Подписчики</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="stat-likes">0</div>
+                        <div class="stat-label">Лайки</div>
+                    </div>
+                </div>
+                <img class="edit-profile-button" id="edit-profile-button" src="https://img.icons8.com/ios/50/ffffff/edit--v1.png" alt="edit"/>
+            </div>
+            <div class="settings-section">
+                <button class="settings-button" id="settings-button">
+                    <img src="https://img.icons8.com/ios/50/ffffff/settings.png" alt="settings"/>
+                    Настройки
+                </button>
+                <button class="settings-button" id="favorites-button">
+                    <img src="https://img.icons8.com/ios/50/ffffff/bookmark-ribbon.png" alt="favorites"/>
+                    Избранное
+                </button>
+                <button class="settings-button" id="logout-button">
+                    <img src="https://img.icons8.com/ios/50/ffffff/exit.png" alt="logout"/>
+                    Выйти
+                </button>
+            </div>
         </div>
-        <div class="not-found-card" id="not-found">
-            <img src="https://img.icons8.com/ios/50/ffffff/sad.png" alt="sad"/>
-            <p>Ничего не найдено</p>
-        </div>
-        <div class="content" id="content"></div>
         <div class="navigation">
             <div class="nav-item">
                 <img src="https://img.icons8.com/ios/50/ffffff/leaderboard.png" alt="leaderboard"/>
                 <span class="nav-text">Лидеры</span>
             </div>
-            <div class="nav-item active">
+            <div class="nav-item">
                 <img src="https://img.icons8.com/ios/50/ffffff/home.png" alt="home"/>
                 <span class="nav-text">Главное</span>
             </div>
-            <div class="nav-item">
+            <div class="nav-item active">
                 <img src="https://img.icons8.com/ios/50/ffffff/user.png" alt="profile"/>
                 <span class="nav-text">Профиль</span>
             </div>
         </div>
     </div>
-    <div class="modal" id="post-modal">
+    <div class="modal" id="edit-modal">
         <div class="modal-content">
-            <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
-            <h2>Создать новый пост</h2>
-            <input type="text" id="post-title" placeholder="Заголовок (макс. 16 символов)" maxlength="16">
-            <textarea id="post-text" placeholder="Текст (макс. 30 символов)" maxlength="30"></textarea>
-            <div class="image-upload" id="image-upload">
-                <img class="placeholder" src="https://img.icons8.com/ios/50/ffffff/image.png" alt="image-placeholder"/>
-                <p>Перетащите или выберите изображение</p>
-                <input type="file" id="image-input" accept="image/*">
-                <img class="image-preview" id="image-preview" alt="preview"/>
-            </div>
-            <button class="publish-button" id="publish-button">Опубликовать</button>
+            <img class="modal-close" id="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
+            <h2>Редактировать профиль</h2>
+            <input type="text" id="edit-username" placeholder="Логин (макс. 16 символов)" maxlength="16">
+            <textarea id="edit-bio" placeholder="О себе (макс. 100 символов)" maxlength="100"></textarea>
+            <button class="save-button" id="save-button">Сохранить</button>
         </div>
     </div>
     <script type="module">
-        import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy, updateDoc, onSnapshot } from './database.js';
+        import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, signOut, collection, getDocs, query, where } from './database.js';
 
-        const searchInput = document.querySelector('.search-input');
-        const notFoundCard = document.querySelector('.not-found-card');
+        const profileAvatar = document.querySelector('#profile-avatar');
+        const avatarUpload = document.querySelector('#avatar-upload');
+        const profileUsername = document.querySelector('#profile-username');
+        const profileBio = document.querySelector('#profile-bio');
+        const statSubscriptions = document.querySelector('#stat-subscriptions');
+        const statSubscribers = document.querySelector('#stat-subscribers');
+        const statLikes = document.querySelector('#stat-likes');
+        const editProfileButton = document.querySelector('#edit-profile-button');
+        const settingsButton = document.querySelector('#settings-button');
+        const favoritesButton = document.querySelector('#favorites-button');
+        const logoutButton = document.querySelector('#logout-button');
+        const modal = document.querySelector('#edit-modal');
+        const modalClose = document.querySelector('#modal-close');
+        const editUsername = document.querySelector('#edit-username');
+        const editBio = document.querySelector('#edit-bio');
+        const saveButton = document.querySelector('#save-button');
         const navItems = document.querySelectorAll('.nav-item');
-        const verifiedIcon = document.querySelector('.verified-icon');
-        const plusIcon = document.querySelector('.plus-icon');
-        const modal = document.querySelector('#post-modal');
-        const modalClose = document.querySelector('.modal-close');
-        const imageUpload = document.querySelector('#image-upload');
-        const imageInput = document.querySelector('#image-input');
-        const imagePreview = document.querySelector('#image-preview');
-        const publishButton = document.querySelector('#publish-button');
-        const postTitle = document.querySelector('#post-title');
-        const postText = document.querySelector('#post-text');
-        const content = document.querySelector('#content');
         const loadingOverlay = document.querySelector('#loading-overlay');
 
         const IMGUR_CLIENT_ID = '8ea63c636bd153e';
         let currentUser = null;
-        let userInteractions = new Map();
 
-        async function loadPosts() {
-            content.innerHTML = '';
-            const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-            const querySnapshot = await getDocs(postsQuery);
-            for (const postDoc of querySnapshot.docs) {
-                const postData = postDoc.data();
-                const postId = postDoc.id;
-                const userRef = doc(db, 'users', postData.uid);
-                const userDoc = await getDoc(userRef);
-                const userData = userDoc.data();
-                renderPost(postData, userData, postId);
-            }
-        }
-
-        function listenForNewPosts() {
-            const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-            onSnapshot(postsQuery, (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === 'added') {
-                        const postData = change.doc.data();
-                        const postId = change.doc.id;
-                        if (postData.uid === currentUser.uid) {
-                            getDoc(doc(db, 'users', postData.uid)).then(userDoc => {
-                                const userData = userDoc.data();
-                                renderPost(postData, userData, postId, true);
-                            });
-                        }
-                    }
-                });
-            });
-        }
-
-        function updatePostTimes() {
-            const posts = content.querySelectorAll('.post');
-            posts.forEach(post => {
-                const createdAt = post.dataset.createdAt;
-                if (createdAt) {
-                    const timeElement = post.querySelector('.post-time');
-                    const diff = Date.now() - parseInt(createdAt);
-                    const seconds = Math.floor(diff / 1000);
-                    const minutes = Math.floor(seconds / 60);
-                    const hours = Math.floor(minutes / 60);
-
-                    if (seconds < 60) {
-                        timeElement.textContent = `${seconds} сек назад`;
-                    } else if (minutes < 60) {
-                        timeElement.textContent = `${minutes} мин назад`;
-                    } else {
-                        timeElement.textContent = `${hours} ч назад`;
-                    }
-                }
-            });
-        }
-
-        setInterval(updatePostTimes, 1000);
-
-        searchInput.addEventListener('input', () => {
-            const searchTerm = searchInput.value.trim().toLowerCase();
-            const posts = content.querySelectorAll('.post');
-            let hasMatches = false;
-
-            posts.forEach(post => {
-                const title = post.querySelector('.post-title')?.textContent.toLowerCase() || '';
-                const text = post.querySelector('.post-text')?.textContent.toLowerCase() || '';
-                if (title.includes(searchTerm) || text.includes(searchTerm)) {
-                    post.style.display = 'flex';
-                    hasMatches = true;
-                } else {
-                    post.style.display = 'none';
-                }
-            });
-
-            if (searchTerm === '') {
-                posts.forEach(post => post.style.display = 'flex');
-                notFoundCard.classList.remove('active');
-            } else if (!hasMatches) {
-                notFoundCard.classList.add('active');
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadProfile();
+                await updateLikesFromPosts();
             } else {
-                notFoundCard.classList.remove('active');
+                window.location.href = 'auth.html';
             }
         });
 
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                navItems.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                const navText = item.querySelector('.nav-text').textContent;
-                if (navText === 'Профиль') {
-                    window.location.href = 'profile.html';
-                } else if (navText === 'Лидеры') {
-                    alert('Переход на страницу лидеров (заглушка)!');
+        async function loadProfile() {
+            try {
+                loadingOverlay.classList.add('active');
+                const userDocRef = doc(db, 'users', currentUser.uid);
+                const userDoc = await getDoc(userDocRef);
+                const defaultData = {
+                    username: 'Guest',
+                    bio: 'О себе...',
+                    avatar: 'https://img.icons8.com/ios/50/ffffff/user.png',
+                    subscriptions: 0,
+                    subscribers: 0,
+                    likes: 0
+                };
+
+                const userData = userDoc.exists() ? userDoc.data() : defaultData;
+
+                profileUsername.textContent = userData.username || defaultData.username;
+                profileBio.textContent = userData.bio || defaultData.bio;
+                profileAvatar.src = userData.avatar || defaultData.avatar;
+                statSubscriptions.textContent = userData.subscriptions || 0;
+                statSubscribers.textContent = userData.subscribers || 0;
+                statLikes.textContent = userData.likes || 0;
+
+                if (!userDoc.exists()) {
+                    await setDoc(userDocRef, defaultData);
                 }
-            });
-        });
-
-        verifiedIcon.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            verifiedIcon.classList.add('show-tooltip');
-            setTimeout(() => {
-                verifiedIcon.classList.remove('show-tooltip');
-            }, 2000);
-        });
-
-        verifiedIcon.addEventListener('click', () => {
-            verifiedIcon.classList.toggle('show-tooltip');
-        });
-
-        plusIcon.addEventListener('click', () => {
-            modal.classList.add('active');
-        });
-
-        modalClose.addEventListener('click', () => {
-            modal.classList.remove('active');
-            resetModal();
-        });
-
-        imageUpload.addEventListener('click', () => {
-            imageInput.click();
-        });
-
-        imageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    imagePreview.src = reader.result;
-                    imageUpload.classList.add('has-image');
-                };
-                reader.readAsDataURL(file);
+            } catch (error) {
+                console.error('Ошибка загрузки профиля:', error);
+                alert('Ошибка загрузки профиля!');
+            } finally {
+                loadingOverlay.classList.remove('active');
             }
-        });
-
-        imageUpload.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            imageUpload.style.borderColor = '#6464ff';
-        });
-
-        imageUpload.addEventListener('dragleave', () => {
-            imageUpload.style.borderColor = '#303044';
-        });
-
-        imageUpload.addEventListener('drop', (e) => {
-            e.preventDefault();
-            imageUpload.style.borderColor = '#303044';
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    imagePreview.src = reader.result;
-                    imageUpload.classList.add('has-image');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        }
 
         async function uploadToImgur(file) {
             const formData = new FormData();
@@ -818,254 +576,109 @@
             }
         }
 
-        publishButton.addEventListener('click', async () => {
-            const title = postTitle.value.trim();
-            const text = postText.value.trim();
-            const file = imageInput.files[0];
+        async function updateLikesFromPosts() {
+            try {
+                const postsQuery = query(collection(db, 'posts'), where('uid', '==', currentUser.uid));
+                const postsSnapshot = await getDocs(postsQuery);
+                let totalLikes = 0;
 
-            if (title || text || file) {
+                postsSnapshot.forEach(doc => {
+                    const postData = doc.data();
+                    totalLikes += postData.likes || 0;
+                });
+
+                await updateDoc(doc(db, 'users', currentUser.uid), { likes: totalLikes });
+                statLikes.textContent = totalLikes;
+            } catch (error) {
+                console.error('Ошибка подсчета лайков:', error);
+                statLikes.textContent = '0';
+            }
+        }
+
+        profileAvatar.addEventListener('click', () => {
+            avatarUpload.click();
+        });
+
+        avatarUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
                 loadingOverlay.classList.add('active');
-                let imageUrl = '';
-
-                if (file) {
-                    try {
-                        imageUrl = await uploadToImgur(file);
-                    } catch (error) {
-                        alert('Ошибка загрузки изображения!');
-                        loadingOverlay.classList.remove('active');
-                        return;
-                    }
-                }
-
-                const postData = {
-                    uid: currentUser.uid,
-                    title,
-                    text,
-                    imageUrl,
-                    createdAt: Date.now(),
-                    likes: 0,
-                    dislikes: 0,
-                    comments: 0
-                };
-
                 try {
-                    await addDoc(collection(db, 'posts'), postData);
-                    modal.classList.remove('active');
-                    resetModal();
+                    const avatarUrl = await uploadToImgur(file);
+                    await setDoc(doc(db, 'users', currentUser.uid), { avatar: avatarUrl }, { merge: true });
+                    profileAvatar.src = avatarUrl;
                 } catch (error) {
-                    alert('Ошибка публикации поста!');
+                    alert('Ошибка загрузки аватара!');
+                    console.error(error);
+                }
+                loadingOverlay.classList.remove('active');
+            }
+        });
+
+        editProfileButton.addEventListener('click', () => {
+            modal.classList.add('active');
+            editUsername.value = profileUsername.textContent;
+            editBio.value = profileBio.textContent === 'О себе...' ? '' : profileBio.textContent;
+        });
+
+        modalClose.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        saveButton.addEventListener('click', async () => {
+            const newUsername = editUsername.value.trim();
+            const newBio = editBio.value.trim();
+            if (newUsername) {
+                loadingOverlay.classList.add('active');
+                try {
+                    await setDoc(doc(db, 'users', currentUser.uid), {
+                        username: newUsername,
+                        bio: newBio || 'О себе...'
+                    }, { merge: true });
+                    profileUsername.textContent = newUsername;
+                    profileBio.textContent = newBio || 'О себе...';
+                    modal.classList.remove('active');
+                } catch (error) {
+                    alert('Ошибка сохранения профиля!');
                     console.error(error);
                 }
                 loadingOverlay.classList.remove('active');
             } else {
-                alert('Добавьте хотя бы заголовок, текст или изображение!');
+                alert('Логин не может быть пустым!');
             }
         });
 
-        function resetModal() {
-            postTitle.value = '';
-            postText.value = '';
-            imageInput.value = '';
-            imageUpload.classList.remove('has-image');
-            imagePreview.src = '';
-        }
+        settingsButton.addEventListener('click', () => {
+            alert('Настройки пока не реализованы!');
+        });
 
-        async function handleLike(postId, likeAction, dislikeAction, likeCount, dislikeCount) {
-            const interaction = userInteractions.get(postId) || { liked: false, disliked: false };
-            
-            if (!interaction.liked) {
-                likeCount.textContent = parseInt(likeCount.textContent) + 1;
-                likeAction.classList.add('active');
-                
-                if (interaction.disliked) {
-                    dislikeCount.textContent = parseInt(dislikeCount.textContent) - 1;
-                    dislikeAction.classList.remove('active');
-                    interaction.disliked = false;
-                }
-                
-                interaction.liked = true;
-                userInteractions.set(postId, interaction);
-                
-                try {
-                    const postRef = doc(db, 'posts', postId);
-                    await updateDoc(postRef, {
-                        likes: parseInt(likeCount.textContent),
-                        ...(interaction.disliked ? { dislikes: parseInt(dislikeCount.textContent) } : {})
-                    });
-                } catch (error) {
-                    console.error('Error updating like:', error);
-                    likeCount.textContent = parseInt(likeCount.textContent) - 1;
-                    likeAction.classList.remove('active');
-                    interaction.liked = false;
-                    userInteractions.set(postId, interaction);
-                }
-            }
-        }
+        favoritesButton.addEventListener('click', () => {
+            alert('Избранное пока не реализовано!');
+        });
 
-        async function handleDislike(postId, dislikeAction, likeAction, dislikeCount, likeCount) {
-            const interaction = userInteractions.get(postId) || { liked: false, disliked: false };
-            
-            if (!interaction.disliked) {
-                dislikeCount.textContent = parseInt(dislikeCount.textContent) + 1;
-                dislikeAction.classList.add('active');
-                
-                if (interaction.liked) {
-                    likeCount.textContent = parseInt(likeCount.textContent) - 1;
-                    likeAction.classList.remove('active');
-                    interaction.liked = false;
-                }
-                
-                interaction.disliked = true;
-                userInteractions.set(postId, interaction);
-                
-                try {
-                    const postRef = doc(db, 'posts', postId);
-                    await updateDoc(postRef, {
-                        dislikes: parseInt(dislikeCount.textContent),
-                        ...(interaction.liked ? { likes: parseInt(likeCount.textContent) } : {})
-                    });
-                } catch (error) {
-                    console.error('Error updating dislike:', error);
-                    dislikeCount.textContent = parseInt(dislikeCount.textContent) - 1;
-                    dislikeAction.classList.remove('active');
-                    interaction.disliked = false;
-                    userInteractions.set(postId, interaction);
-                }
-            }
-        }
-
-        function renderPost(postData, userData, postId, prepend = false) {
-            const existingPost = document.querySelector(`.post[data-id="${postId}"]`);
-            if (existingPost) return;
-
-            const post = document.createElement('div');
-            post.classList.add('post');
-            post.dataset.createdAt = postData.createdAt;
-            post.dataset.id = postId;
-
-            const postHeader = document.createElement('div');
-            postHeader.classList.add('post-header');
-
-            const postAvatar = document.createElement('img');
-            postAvatar.classList.add('post-avatar');
-            postAvatar.src = userData.avatar || 'https://img.icons8.com/ios/50/ffffff/user.png';
-            postAvatar.alt = 'avatar';
-            postHeader.appendChild(postAvatar);
-
-            const headerInfo = document.createElement('div');
-            const postUsernameContainer = document.createElement('div');
-            postUsernameContainer.classList.add('post-username-container');
-            
-            const postUsernameElement = document.createElement('div');
-            postUsernameElement.classList.add('post-username');
-            postUsernameElement.textContent = userData.username || 'Guest';
-            postUsernameContainer.appendChild(postUsernameElement);
-
-            if (userData.verify) {
-                const verifiedIcon = document.createElement('img');
-                verifiedIcon.classList.add('post-verified');
-                verifiedIcon.src = 'https://img.icons8.com/color/48/instagram-verification-badge.png';
-                verifiedIcon.alt = 'verified';
-                postUsernameContainer.appendChild(verifiedIcon);
-            }
-
-            headerInfo.appendChild(postUsernameContainer);
-
-            const postTime = document.createElement('div');
-            postTime.classList.add('post-time');
-            postTime.textContent = '0 сек назад';
-            headerInfo.appendChild(postTime);
-
-            postHeader.appendChild(headerInfo);
-            post.appendChild(postHeader);
-
-            if (postData.imageUrl) {
-                const postImage = document.createElement('img');
-                postImage.classList.add('post-image');
-                postImage.src = postData.imageUrl;
-                postImage.alt = 'post image';
-                post.appendChild(postImage);
-            }
-
-            if (postData.title) {
-                const postTitleElement = document.createElement('div');
-                postTitleElement.classList.add('post-title');
-                postTitleElement.textContent = postData.title;
-                post.appendChild(postTitleElement);
-            }
-
-            if (postData.text) {
-                const postTextElement = document.createElement('div');
-                postTextElement.classList.add('post-text');
-                postTextElement.textContent = postData.text;
-                post.appendChild(postTextElement);
-            }
-
-            const postActions = document.createElement('div');
-            postActions.classList.add('post-actions');
-
-            const likeAction = document.createElement('div');
-            likeAction.classList.add('action-item');
-            const likeIcon = document.createElement('img');
-            likeIcon.src = 'https://img.icons8.com/ios/50/ffffff/like--v1.png';
-            likeIcon.alt = 'like';
-            const likeCount = document.createElement('span');
-            likeCount.textContent = postData.likes;
-            likeAction.appendChild(likeIcon);
-            likeAction.appendChild(likeCount);
-            postActions.appendChild(likeAction);
-
-            const dislikeAction = document.createElement('div');
-            dislikeAction.classList.add('action-item');
-            const dislikeIcon = document.createElement('img');
-            dislikeIcon.src = 'https://img.icons8.com/ios/50/ffffff/dislike--v1.png';
-            dislikeIcon.alt = 'dislike';
-            const dislikeCount = document.createElement('span');
-            dislikeCount.textContent = postData.dislikes;
-            dislikeAction.appendChild(dislikeIcon);
-            dislikeAction.appendChild(dislikeCount);
-            postActions.appendChild(dislikeAction);
-
-            const commentAction = document.createElement('div');
-            commentAction.classList.add('action-item');
-            const commentIcon = document.createElement('img');
-            commentIcon.src = 'https://img.icons8.com/ios/50/ffffff/comments--v1.png';
-            commentIcon.alt = 'comment';
-            const commentCount = document.createElement('span');
-            commentCount.textContent = postData.comments;
-            commentAction.appendChild(commentIcon);
-            commentAction.appendChild(commentCount);
-            postActions.appendChild(commentAction);
-
-            post.appendChild(postActions);
-
-            likeAction.addEventListener('click', () => {
-                handleLike(postId, likeAction, dislikeAction, likeCount, dislikeCount);
-            });
-
-            dislikeAction.addEventListener('click', () => {
-                handleDislike(postId, dislikeAction, likeAction, dislikeCount, likeCount);
-            });
-
-            commentAction.addEventListener('click', () => {
-                alert('Комментарии пока не реализованы!');
-            });
-
-            if (prepend) {
-                content.prepend(post);
-            } else {
-                content.appendChild(post);
-            }
-        }
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                await loadPosts();
-                listenForNewPosts();
-            } else {
+        logoutButton.addEventListener('click', async () => {
+            loadingOverlay.classList.add('active');
+            try {
+                await signOut(auth);
                 window.location.href = 'auth.html';
+            } catch (error) {
+                alert('Ошибка при выходе!');
+                console.error(error);
             }
+            loadingOverlay.classList.remove('active');
+        });
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                const navText = item.querySelector('.nav-text').textContent;
+                if (navText === 'Главное') {
+                    window.location.href = 'index.html';
+                } else if (navText === 'Лидеры') {
+                    alert('Переход на страницу лидеров (заглушка)!');
+                }
+            });
         });
     </script>
 </body>
