@@ -498,7 +498,7 @@
         .image-upload.has-image p {
             display: none;
         }
-        .schedule-upload.has-image .image-preview {
+        .image-upload.has-image .image-preview {
             display: block;
         }
         .publish-button {
@@ -610,7 +610,7 @@
         </div>
     </div>
     <script type="module">
-        import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy } from './database.js';
+        import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy, updateDoc } from './database.js';
 
         const searchInput = document.querySelector('.search-input');
         const notFoundCard = document.querySelector('.not-found-card');
@@ -628,19 +628,8 @@
         const content = document.querySelector('#content');
         const loadingOverlay = document.querySelector('#loading-overlay');
 
-        // Конфигурация Imgur
-        const IMGUR_CLIENT_ID = '8ea63c636bd153e'; // Замени на твой Client ID
-
+        const IMGUR_CLIENT_ID = '8ea63c636bd153e';
         let currentUser = null;
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                await loadPosts();
-            } else {
-                window.location.href = 'auth.html';
-            }
-        });
 
         async function loadPosts() {
             content.innerHTML = '';
@@ -648,10 +637,11 @@
             const querySnapshot = await getDocs(postsQuery);
             for (const postDoc of querySnapshot.docs) {
                 const postData = postDoc.data();
+                const postId = postDoc.id;
                 const userRef = doc(db, 'users', postData.uid);
                 const userDoc = await getDoc(userRef);
                 const userData = userDoc.data();
-                renderPost(postData, userData);
+                renderPost(postData, userData, postId);
             }
         }
 
@@ -678,6 +668,7 @@
         }
 
         setInterval(updatePostTimes, 1000);
+        setInterval(loadPosts, 10000);
 
         searchInput.addEventListener('input', () => {
             const searchTerm = searchInput.value.trim().toLowerCase();
@@ -854,7 +845,43 @@
             imagePreview.src = '';
         }
 
-        function renderPost(postData, userData) {
+        async function handleLike(postId, likeAction, dislikeAction, likeCount, dislikeCount) {
+            if (!likeAction.classList.contains('active')) {
+                const postRef = doc(db, 'posts', postId);
+                await updateDoc(postRef, {
+                    likes: parseInt(likeCount.textContent) + 1
+                });
+                likeCount.textContent = parseInt(likeCount.textContent) + 1;
+                likeAction.classList.add('active');
+                if (dislikeAction.classList.contains('active')) {
+                    await updateDoc(postRef, {
+                        dislikes: parseInt(dislikeCount.textContent) - 1
+                    });
+                    dislikeCount.textContent = parseInt(dislikeCount.textContent) - 1;
+                    dislikeAction.classList.remove('active');
+                }
+            }
+        }
+
+        async function handleDislike(postId, dislikeAction, likeAction, dislikeCount, likeCount) {
+            if (!dislikeAction.classList.contains('active')) {
+                const postRef = doc(db, 'posts', postId);
+                await updateDoc(postRef, {
+                    dislikes: parseInt(dislikeCount.textContent) + 1
+                });
+                dislikeCount.textContent = parseInt(dislikeCount.textContent) + 1;
+                dislikeAction.classList.add('active');
+                if (likeAction.classList.contains('active')) {
+                    await updateDoc(postRef, {
+                        likes: parseInt(likeCount.textContent) - 1
+                    });
+                    likeCount.textContent = parseInt(likeCount.textContent) - 1;
+                    likeAction.classList.remove('active');
+                }
+            }
+        }
+
+        function renderPost(postData, userData, postId) {
             const post = document.createElement('div');
             post.classList.add('post');
             post.dataset.createdAt = postData.createdAt;
@@ -943,25 +970,11 @@
             post.appendChild(postActions);
 
             likeAction.addEventListener('click', () => {
-                if (!likeAction.classList.contains('active')) {
-                    likeCount.textContent = parseInt(likeCount.textContent) + 1;
-                    likeAction.classList.add('active');
-                    if (dislikeAction.classList.contains('active')) {
-                        dislikeCount.textContent = parseInt(dislikeCount.textContent) - 1;
-                        dislikeAction.classList.remove('active');
-                    }
-                }
+                handleLike(postId, likeAction, dislikeAction, likeCount, dislikeCount);
             });
 
             dislikeAction.addEventListener('click', () => {
-                if (!dislikeAction.classList.contains('active')) {
-                    dislikeCount.textContent = parseInt(dislikeCount.textContent) + 1;
-                    dislikeAction.classList.add('active');
-                    if (likeAction.classList.contains('active')) {
-                        likeCount.textContent = parseInt(likeCount.textContent) - 1;
-                        likeAction.classList.remove('active');
-                    }
-                }
+                handleDislike(postId, dislikeAction, likeAction, dislikeCount, likeCount);
             });
 
             commentAction.addEventListener('click', () => {
@@ -970,6 +983,15 @@
 
             content.appendChild(post);
         }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadPosts();
+            } else {
+                window.location.href = 'auth.html';
+            }
+        });
     </script>
 </body>
 </html>
