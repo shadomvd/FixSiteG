@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, getDocs, query, orderBy, onSnapshot, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, getDocs, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDmXvrvFGx41c5Ulk9zN1WroeCOfHeoUwE",
@@ -11,9 +11,15 @@ const firebaseConfig = {
     appId: "1:1061245740426:web:d51058e56016c932b49473"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+let app, auth, db;
+
+try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+} catch (error) {
+    console.error('Ошибка инициализации Firebase:', error);
+}
 
 export { 
     auth, 
@@ -31,6 +37,5 @@ export {
     getDocs, 
     query, 
     orderBy, 
-    onSnapshot,
-    where 
+    onSnapshot 
 };
