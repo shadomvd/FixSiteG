@@ -273,8 +273,8 @@
         <form id="login-form" class="form active">
             <h2>Вход в аккаунт</h2>
             <div>
-                <input type="email" placeholder="Эл. почта" id="login-email">
-                <div class="tooltip error" id="login-email-error"></div>
+                <input type="text" placeholder="Эл. почта или логин" id="login-identifier">
+                <div class="tooltip error" id="login-identifier-error"></div>
             </div>
             <div class="password-container">
                 <input type="password" placeholder="Пароль" id="login-password">
@@ -340,7 +340,7 @@
     </div>
 
     <script type="module">
-        import { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, doc, setDoc } from './database.js';
+        import { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, doc, setDoc, collection, query, where, getDocs } from './database.js';
 
         function resetFormInputs(form) {
             const inputs = form.querySelectorAll('input');
@@ -392,6 +392,16 @@
             if (navigator.vibrate) {
                 navigator.vibrate(50);
             }
+        }
+
+        async function findUserByUsername(username) {
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where('username', '==', username));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                return querySnapshot.docs[0].data().email;
+            }
+            return null;
         }
 
         window.onload = function() {
@@ -481,8 +491,7 @@
                         likes: 0
                     });
 
-                    // Подставляем данные в форму логина
-                    document.getElementById('login-email').value = email;
+                    document.getElementById('login-identifier').value = email;
                     document.getElementById('login-password').value = password;
                     toggleLogin();
                 } catch (error) {
@@ -502,17 +511,17 @@
 
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const email = document.getElementById('login-email').value.trim();
+                const identifier = document.getElementById('login-identifier').value.trim();
                 const password = document.getElementById('login-password').value.trim();
-                const emailError = document.getElementById('login-email-error');
+                const identifierError = document.getElementById('login-identifier-error');
                 const passwordError = document.getElementById('login-password-error');
 
-                emailError.classList.remove('active');
+                identifierError.classList.remove('active');
                 passwordError.classList.remove('active');
 
-                if (!email) {
-                    emailError.textContent = 'Введите эл. почту';
-                    emailError.classList.add('active');
+                if (!identifier) {
+                    identifierError.textContent = 'Введите эл. почту или логин';
+                    identifierError.classList.add('active');
                     return;
                 }
 
@@ -524,15 +533,27 @@
 
                 try {
                     loadingOverlay.classList.add('active');
+                    let email = identifier;
+
+                    if (!identifier.includes('@')) {
+                        const foundEmail = await findUserByUsername(identifier);
+                        if (!foundEmail) {
+                            identifierError.textContent = 'Пользователь с таким логином не найден';
+                            identifierError.classList.add('active');
+                            return;
+                        }
+                        email = foundEmail;
+                    }
+
                     await signInWithEmailAndPassword(auth, email, password);
                     window.location.href = 'index.html';
                 } catch (error) {
                     if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-                        passwordError.textContent = 'Неверный email или пароль';
+                        passwordError.textContent = 'Неверный email/логин или пароль';
                         passwordError.classList.add('active');
                     } else if (error.code === 'auth/invalid-email') {
-                        emailError.textContent = 'Неверный формат эл. почты';
-                        emailError.classList.add('active');
+                        identifierError.textContent = 'Неверный формат эл. почты';
+                        identifierError.classList.add('active');
                     } else {
                         alert('Ошибка входа: ' + error.message);
                     }
