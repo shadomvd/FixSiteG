@@ -58,7 +58,8 @@ export {
     collection, 
     addDoc, 
     getDocs, 
-    query, 
+    query,
+    where,
     orderBy, 
     onSnapshot 
 };
