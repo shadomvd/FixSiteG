@@ -19,7 +19,7 @@
             height: 100%;
             background: #0f0f1a;
             color: #ffffff;
-            overscroll-behavior: none自家
+            overscroll-behavior: none;
             -webkit-overflow-scrolling: touch;
             overflow-y: auto;
         }
@@ -578,9 +578,44 @@
             font-weight: 400;
             color: #c9d1d9;
             text-align: center;
-            margin-top: 8px;
+            margin-top: 4px;
             max-width: 90%;
             word-wrap: break-word;
+        }
+        .cooldown-modal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .cooldown-message {
+            color: #ff5555;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .cooldown-close-button {
+            width: 96%;
+            margin: 0 auto;
+            padding: 8px;
+            background: linear-gradient(145deg, #ff5555, #cc4444);
+            border: none;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255, 85, 85, 0.4);
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+        .cooldown-close-button:hover {
+            background: linear-gradient(145deg, #ff6666, #dd5555);
+            transform: scale(1.02);
+            box-shadow: 0 3px 12px rgba(255, 85, 85, 0.5);
+        }
+        .cooldown-close-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 85, 85, 0.4);
         }
         @keyframes fadeInElement {
             from { opacity: 0; transform: translateY(10px); }
@@ -657,7 +692,7 @@
             <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
             <h2>Создать новый пост</h2>
             <input type="text" id="post-title" placeholder="Заголовок (макс. 16 символов)" maxlength="16">
-            <textarea id="post-text" placeholder="Текст (макс. 30 символов)" maxlength="30"></textarea>
+            <textarea id="post-text" placeholder="Текст (макс. 500 символов)" maxlength="500"></textarea>
             <div class="image-upload" id="image-upload">
                 <img class="placeholder" src="https://img.icons8.com/ios/50/ffffff/image.png" alt="image-placeholder"/>
                 <p>Перетащите или выберите изображение</p>
@@ -700,6 +735,13 @@
             <img id="post-image-modal" class="post-image-modal" src="" alt="post image"/>
         </div>
     </div>
+    <div class="modal" id="cooldown-modal">
+        <div class="modal-content cooldown-modal-content">
+            <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
+            <p class="cooldown-message" id="cooldown-message">Подождите перед созданием нового поста!</p>
+            <button class="cooldown-close-button" id="cooldown-close-button">Закрыть</button>
+        </div>
+    </div>
     <script type="module">
         import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy, onSnapshot } from './database.js';
 
@@ -730,10 +772,15 @@
         const imageModal = document.querySelector('#image-modal');
         const postImageModal = document.querySelector('#post-image-modal');
         const imageModalClose = document.querySelector('#image-modal .modal-close');
+        const cooldownModal = document.querySelector('#cooldown-modal');
+        const cooldownMessage = document.querySelector('#cooldown-message');
+        const cooldownCloseButton = document.querySelector('#cooldown-close-button');
 
         const IMGUR_CLIENT_ID = '8ea63c636bd153e';
         let currentUser = null;
         let unsubscribeSnapshot = null;
+        let lastPostTimestamp = null;
+        const POST_COOLDOWN = 5 * 60 * 1000; // 5 минут в миллисекундах
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -752,6 +799,8 @@
                         await loadPosts();
                         listenForNewPosts();
                     }
+                    // Загрузка времени последнего поста
+                    lastPostTimestamp = localStorage.getItem(`lastPost_${currentUser.uid}`) || null;
                 } catch (error) {
                     console.error('Ошибка загрузки постов:', error);
                     alert('Не удалось загрузить посты. Проверьте настройки Firestore.');
@@ -922,7 +971,13 @@
         });
 
         plusIcon.addEventListener('click', () => {
-            modal.classList.add('active');
+            if (lastPostTimestamp && (Date.now() - parseInt(lastPostTimestamp)) < POST_COOLDOWN) {
+                const timeLeft = Math.ceil((POST_COOLDOWN - (Date.now() - parseInt(lastPostTimestamp))) / 1000 / 60);
+                cooldownMessage.textContent = `Подождите ${timeLeft} минут перед созданием нового поста!`;
+                cooldownModal.classList.add('active');
+            } else {
+                modal.classList.add('active');
+            }
         });
 
         modalClose.addEventListener('click', () => {
@@ -936,6 +991,10 @@
 
         imageModalClose.addEventListener('click', () => {
             imageModal.classList.remove('active');
+        });
+
+        cooldownCloseButton.addEventListener('click', () => {
+            cooldownModal.classList.remove('active');
         });
 
         imageUpload.addEventListener('click', () => {
@@ -1057,6 +1116,9 @@
                 cachedData.users[currentUser.uid] = userData;
                 cachedData.posts.unshift(postData);
                 localStorage.setItem(`posts_${currentUser.uid}`, JSON.stringify(cachedData));
+                // Сохраняем время публикации поста
+                lastPostTimestamp = Date.now();
+                localStorage.setItem(`lastPost_${currentUser.uid}`, lastPostTimestamp);
             } catch (error) {
                 console.error('Ошибка публикации поста:', error);
                 alert('Ошибка публикации поста!');
@@ -1092,7 +1154,7 @@
             postAvatar.addEventListener('click', () => {
                 avatarModalImage.src = postAvatar.src;
                 avatarModalUsername.textContent = userData.username || 'Guest';
-                avatarModalVerified.style.display = userData.verify ? 'block' : 'none';
+                avatarModalVerified.style.display = userData.verify ? 'inline-block' : 'none';
                 avatarModalBio.textContent = userData.bio || 'Биография не указана';
                 statSubscriptions.textContent = userData.subscriptions || 0;
                 statSubscribers.textContent = userData.subscribers || 0;
