@@ -1,1262 +1,315 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FixSite - Соцсеть</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Roboto', sans-serif;
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        html, body {
-            height: 100%;
-            background: #0f0f1a;
-            color: #ffffff;
-            overscroll-behavior: none;
-            -webkit-overflow-scrolling: touch;
-            overflow-y: auto;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto;
-            padding: 12px;
-            background: linear-gradient(180deg, #1e1e2e 0%, #0f0f1a 100%);
-            position: relative;
-        }
-        .content {
-            flex-grow: 1;
-            padding-bottom: 100px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .nav-bar {
-            width: 100%;
-            background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
-            padding: 10px 14px;
-            margin-bottom: 16px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            border: 1px solid rgba(100, 100, 150, 0.2);
-        }
-        .nav-bar-title {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-grow: 1;
-            text-align: center;
-            gap: 6px;
-            position: relative;
-        }
-        .nav-bar img.plus-icon {
-            position: absolute;
-            right: 12px;
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            transition: transform 0.2s, filter 0.2s;
-            filter: brightness(1);
-        }
-        .nav-bar img.plus-icon:hover {
-            transform: scale(1.1);
-            filter: brightness(1.2) drop-shadow(0 0 8px rgba(100, 100, 255, 0.5));
-        }
-        .nav-bar img.plus-icon:active {
-            animation: spinAndGlow 0.6s ease forwards;
-        }
-        @keyframes spinAndGlow {
-            0% {
-                transform: scale(1) rotate(0deg);
-                filter: brightness(1) drop-shadow(0 0 0 rgba(100, 100, 255, 0));
-            }
-            50% {
-                transform: scale(1.3) rotate(180deg);
-                filter: brightness(1.5) drop-shadow(0 0 12px rgba(100, 100, 255, 0.8));
-            }
-            100% {
-                transform: scale(1) rotate(360deg);
-                filter: brightness(1) drop-shadow(0 0 0 rgba(100, 100, 255, 0));
-            }
-        }
-        .verified-icon {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .verified-icon:hover {
-            transform: scale(1.1);
-        }
-        .verified-tooltip {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(145deg, #333344, #222233);
-            color: #ffffff;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 500;
-            white-space: nowrap;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-            z-index: 10;
-            opacity: 0;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        }
-        .verified-icon:hover + .verified-tooltip,
-        .verified-icon:active + .verified-tooltip,
-        .verified-icon.show-tooltip + .verified-tooltip {
-            display: block;
-            opacity: 1;
-            transform: translateX(-50%) translateY(4px);
-        }
-        .search-container {
-            position: relative;
-            width: 100%;
-            max-width: 260px;
-            margin: 0 auto 16px;
-        }
-        .search-input {
-            width: 100%;
-            padding: 10px 36px 10px 14px;
-            border-radius: 8px;
-            border: 1px solid #444455;
-            background: linear-gradient(145deg, #333344, #222233);
-            font-size: 14px;
-            color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            outline: none;
-            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-            user-select: auto;
-        }
-        .search-input:focus {
-            border-color: #6464ff;
-            box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
-            transform: scale(1.02);
-        }
-        .search-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            filter: brightness(0.8);
-            transition: filter 0.2s;
-        }
-        .search-input:focus + .search-icon {
-            filter: brightness(1);
-        }
-        .not-found-card {
-            display: none;
-            text-align: center;
-            padding: 16px;
-            background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            margin: 0 auto 16px;
-            width: 85%;
-            opacity: 0;
-            animation: slideIn 0.4s ease forwards;
-            border: 1px solid rgba(100, 100, 150, 0.2);
-        }
-        .not-found-card.active {
-            display: block;
-            opacity: 1;
-        }
-        .not-found-card img {
-            width: 32px;
-            height: 32px;
-            margin-bottom: 8px;
-            filter: brightness(1);
-        }
-        .not-found-card p {
-            font-size: 14px;
-            font-weight: 500;
-            color: #aaaaaa;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes immerseIn {
-            0% {
-                opacity: 0;
-                transform: translateY(-50px) scale(0.95);
-                filter: blur(4px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0);
-            }
-        }
-        .navigation {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            max-width: 480px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            justify-content: space-around;
-            background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
-            padding: 8px 0;
-            border-radius: 12px 12px 0 0;
-            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.3);
-            z-index: 100;
-            border-top: 1px solid rgba(100, 100, 150, 0.2);
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #aaaaaa;
-            cursor: pointer;
-            width: 33.33%;
-            padding: 6px;
-            transition: color 0.2s, transform 0.2s;
-        }
-        .nav-item:hover {
-            color: #ffffff;
-        }
-        .nav-item:active {
-            transform: scale(0.95);
-        }
-        .nav-item img {
-            width: 22px;
-            height: 22px;
-            margin-bottom: 3px;
-            filter: brightness(0.5);
-            transition: filter 0.2s;
-        }
-        .nav-item:hover img {
-            filter: brightness(1);
-        }
-        .nav-text {
-            font-size: 10px;
-            font-weight: 500;
-        }
-        .nav-item.active {
-            color: #6464ff;
-        }
-        .nav-item.active img {
-            filter: brightness(1);
-        }
-        .post {
-            background: linear-gradient(145deg, #222233, #1a1a2a);
-            padding: 14px;
-            border-radius: 8px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            position: relative;
-            border: 0.5px solid rgba(100, 100, 150, 0.2);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            animation: immerseIn 0.5s ease forwards;
-        }
-        .post:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 14px rgba(100, 100, 255, 0.2);
-        }
-        .post-header {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 8px;
-        }
-        .post-avatar {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: #1a1a2a;
-            border: 1px solid #444455;
-            cursor: pointer;
-        }
-        .post-username-container {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .post-username {
-            font-size: 13px;
-            font-weight: 600;
-            color: #c9d1d9;
-        }
-        .post-verified {
-            width: 14px;
-            height: 14px;
-        }
-        .post-time {
-            font-size: 10px;
-            color: #8b949e;
-            margin-top: 2px;
-        }
-        .post-image {
-            width: 100%;
-            max-height: 180px;
-            object-fit: cover;
-            background: #1a1a2a;
-            border-radius: 6px;
-            border: 1px solid #303044;
-            cursor: pointer;
-        }
-        .post-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #ffffff;
-            line-height: 1.3;
-            margin-bottom: 4px;
-        }
-        .post-text {
-            font-size: 13px;
-            font-weight: 400;
-            color: #c9d1d9;
-            line-height: 1.4;
-        }
-        .post-actions {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding-top: 8px;
-            border-top: 1px solid #303044;
-        }
-        .action-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            color: #8b949e;
-            font-size: 12px;
-        }
-        .action-item img {
-            width: 18px;
-            height: 18px;
-            filter: brightness(0.7);
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 200;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .modal.active {
-            display: flex;
-            opacity: 1;
-        }
-        .modal-content {
-            background: linear-gradient(145deg, #222233, #1a1a2a);
-            padding: 16px;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 360px;
-            box-shadow: 0 3px 16px rgba(0, 0, 0, 0.6);
-            position: relative;
-            border: 1px solid #303044;
-            transform: scale(0.9);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        .modal.active .modal-content {
-            transform: scale(1);
-            opacity: 1;
-        }
-        .modal-close {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            filter: brightness(0.8);
-            transition: filter 0.2s, transform 0.2s;
-        }
-        .modal-close:hover {
-            filter: brightness(1);
-            transform: rotate(90deg);
-        }
-        .modal-content h2 {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            text-align: center;
-            color: #c9d1d9;
-            animation: fadeInElement 0.5s ease forwards;
-        }
-        .modal-content input,
-        .modal-content textarea {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            border: 1px solid #303044;
-            background: #1a1a2a;
-            color: #c9d1d9;
-            font-size: 13px;
-            outline: none;
-            resize: none;
-            user-select: auto;
-            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.4);
-            transition: border-color 0.2s, box-shadow 0.2s;
-            animation: fadeInElement 0.5s ease forwards;
-        }
-        .modal-content input:focus,
-        .modal-content textarea:focus {
-            border-color: #6464ff;
-            box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
-        }
-        .image-upload {
-            width: 100%;
-            height: 90px;
-            border: 2px dashed #303044;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            background: #1a1a2a;
-            transition: border-color 0.2s, background 0.2s;
-            animation: fadeInElement 0.5s ease forwards;
-        }
-        .image-upload:hover {
-            border-color: #6464ff;
-            background: #222233;
-        }
-        .image-upload img.placeholder {
-            width: 32px;
-            height: 32px;
-            filter: brightness(0.7);
-            transition: transform 0.3s ease;
-        }
-        .image-upload:hover img.placeholder {
-            transform: scale(1.1);
-        }
-        .image-upload p {
-            font-size: 11px;
-            color: #8b949e;
-            margin-top: 5px;
-        }
-        .image-upload input[type="file"] {
-            display: none;
-        }
-        .image-preview {
-            display: none;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: #1a1a2a;
-        }
-        .image-upload.has-image .placeholder,
-        .image-upload.has-image p {
-            display: none;
-        }
-        .image-upload.has-image .image-preview {
-            display: block;
-        }
-        .publish-button {
-            width: 96%;
-            margin: 0 auto;
-            padding: 8px;
-            background: linear-gradient(145deg, #6464ff, #4b4bff);
-            border: none;
-            border-radius: 6px;
-            color: #ffffff;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(100, 100, 255, 0.4);
-            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-            animation: fadeInElement 0.5s ease forwards;
-        }
-        .publish-button:hover {
-            background: linear-gradient(145deg, #5a5aff, #4141ff);
-            transform: scale(1.02);
-            box-shadow: 0 3px 12px rgba(100, 100, 255, 0.5);
-        }
-        .publish-button:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 8px rgba(100, 100, 255, 0.4);
-        }
-        .avatar-modal-image {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 50%;
-            background: #1a1a2a;
-            border: 1px solid #303044;
-            margin: 0 auto;
-            display: block;
-        }
-        .post-image-modal {
-            width: 100%;
-            max-height: 400px;
-            object-fit: contain;
-            border-radius: 8px;
-            background: #1a1a2a;
-            border: 1px solid #303044;
-            margin: 0 auto;
-            display: block;
-        }
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            margin-top: 16px;
-        }
-        .user-stats {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            padding: 8px 0;
-            border-top: 1px solid rgba(100, 100, 150, 0.3);
-            border-bottom: 1px solid rgba(100, 100, 150, 0.3);
-        }
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-        }
-        .stat-number {
-            font-size: 14px;
-            font-weight: 600;
-            color: #6464ff;
-        }
-        .stat-label {
-            font-size: 10px;
-            font-weight: 400;
-            color: #8b949e;
-        }
-        .username-container {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .user-bio {
-            font-size: 12px;
-            font-weight: 400;
-            color: #c9d1d9;
-            text-align: center;
-            margin-top: 4px;
-            max-width: 90%;
-            word-wrap: break-word;
-            background: rgba(50, 50, 100, 0.2);
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid rgba(100, 100, 150, 0.3);
-            width: 100%;
-            max-width: 260px;
-            line-height: 1.2;
-        }
-        .cooldown-modal-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-        .cooldown-message {
-            color: #ff5555;
-            font-size: 14px;
-            font-weight: 500;
-            text-align: center;
-        }
-        .cooldown-close-button {
-            width: 96%;
-            margin: 0 auto;
-            padding: 8px;
-            background: linear-gradient(145deg, #ff5555, #cc4444);
-            border: none;
-            border-radius: 6px;
-            color: #ffffff;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(255, 85, 85, 0.4);
-            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-        }
-        .cooldown-close-button:hover {
-            background: linear-gradient(145deg, #ff6666, #dd5555);
-            transform: scale(1.02);
-            box-shadow: 0 3px 12px rgba(255, 85, 85, 0.5);
-        }
-        .cooldown-close-button:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 8px rgba(255, 85, 85, 0.4);
-        }
-        @keyframes fadeInElement {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 300;
-            justify-content: center;
-            align-items: center;
-        }
-        .loading-overlay.active {
-            display: flex;
-        }
-        .loader {
-            border: 4px solid #6464ff;
-            border-top: 4px solid transparent;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>FixWorked</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/images/icon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/images/icon.png" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      background-attachment: fixed;
+      background-size: cover;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    .fixworked-top-banner {
+      position: fixed;
+      top: calc(10px + env(safe-area-inset-top));
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #ffffff20;
+      backdrop-filter: blur(10px);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: clamp(12px, 3.5vw, 14px);
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 1100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: clamp(200px, 80%, 300px);
+      text-align: center;
+    }
+
+    .fixworked-top-banner-back {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .fixworked-top-banner-back:active {
+      transform: translateY(-50%) scale(1.2) rotate(90deg);
+    }
+
+    .fixworked-chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: calc(50px + env(safe-area-inset-top)) 8px calc(60px + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .fixworked-message {
+      max-width: 80%;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: clamp(12px, 3.5vw, 13px);
+      line-height: 1.4;
+      word-break: break-word;
+      white-space: normal;
+      display: inline-block;
+    }
+
+    .fixworked-message.support {
+      background: linear-gradient(135deg, #2f2f5e, #4a4a8a);
+      margin-right: auto;
+      margin-left: 8px;
+    }
+
+    .fixworked-message.user {
+      background: linear-gradient(135deg, #3b3b6b, #5a5a9a);
+      margin-left: auto;
+      margin-right: 8px;
+    }
+
+    .fixworked-message-content {
+      display: block;
+      max-width: 100%;
+    }
+
+    .fixworked-message-time {
+      display: block;
+      font-size: clamp(8px, 2.5vw, 9px);
+      color: #a0a0a0;
+      margin-top: 3px;
+      text-align: right;
+    }
+
+    .fixworked-input-container {
+      position: fixed;
+      bottom: env(safe-area-inset-bottom);
+      left: 0;
+      right: 0;
+      height: 55px;
+      background: linear-gradient(135deg, #1f1f3a, #2f2f5e);
+      border-top-left-radius: 14px;
+      border-top-right-radius: 14px;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+    }
+
+    .fixworked-input-container img {
+      width: clamp(24px, 6vw, 26px);
+      height: clamp(24px, 6vw, 26px);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .fixworked-input-container img:active {
+      transform: scale(1.2);
+    }
+
+    .fixworked-input-field {
+      flex: 1;
+      background-color: #ffffff20;
+      border: none;
+      border-radius: 14px;
+      padding: 8px 12px;
+      margin: 0 8px;
+      color: #fff;
+      font-size: clamp(11px, 3.5vw, 12px);
+      outline: none;
+    }
+
+    .fixworked-input-field::placeholder {
+      color: #a0a0a0;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 480px) {
+      .fixworked-chat-container {
+        padding: calc(45px + env(safe-area-inset-top)) 6px calc(55px + env(safe-area-inset-bottom));
+      }
+
+      .fixworked-input-container {
+        height: 50px;
+        padding: 0 6px;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .fixworked-top-banner, .fixworked-input-container, .fixworked-chat-container {
+        display: none;
+      }
+
+      body::after {
+        content: 'Пожалуйста, откройте приложение на мобильном устройстве';
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #fff;
+        font-size: 18px;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="loading-overlay" id="loading-overlay">
-        <div class="loader"></div>
+  <div class="fixworked-top-banner">
+    <img src="assets/images/back.svg" alt="Назад" class="fixworked-top-banner-back" onclick="goBack()" />
+    FixSupport
+  </div>
+  <div class="fixworked-chat-container" onclick="hideKeyboard()">
+    <div class="fixworked-message support">
+      <span class="fixworked-message-content">Здравствуйте! Спасибо, что обратились в службу поддержки. Чем можем помочь?</span>
+      <span class="fixworked-message-time" id="support-message-time"></span>
     </div>
-    <div class="container">
-        <div class="nav-bar">
-            <div class="nav-bar-title">
-                FixSite
-                <img class="verified-icon" src="https://img.icons8.com/color/48/instagram-verification-badge.png" alt="verified"/>
-                <span class="verified-tooltip">Проект верифицирован</span>
-            </div>
-            <img class="plus-icon" src="https://img.icons8.com/ios/50/ffffff/plus--v1.png" alt="plus"/>
-        </div>
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="Поиск...">
-            <img class="search-icon" src="https://img.icons8.com/ios/50/ffffff/search--v1.png" alt="search"/>
-        </div>
-        <div class="not-found-card" id="not-found">
-            <img src="https://img.icons8.com/ios/50/ffffff/sad.png" alt="sad"/>
-            <p>Ничего не найдено</p>
-        </div>
-        <div class="content" id="content"></div>
-        <div class="navigation">
-            <div class="nav-item">
-                <img src="https://img.icons8.com/ios/50/ffffff/leaderboard.png" alt="leaderboard"/>
-                <span class="nav-text">Лидеры</span>
-            </div>
-            <div class="nav-item active">
-                <img src="https://img.icons8.com/ios/50/ffffff/home.png" alt="home"/>
-                <span class="nav-text">Главное</span>
-            </div>
-            <div class="nav-item">
-                <img src="https://img.icons8.com/ios/50/ffffff/user.png" alt="profile"/>
-                <span class="nav-text">Профиль</span>
-            </div>
-        </div>
-    </div>
-    <div class="modal" id="post-modal">
-        <div class="modal-content">
-            <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
-            <h2>Создать новый пост</h2>
-            <input type="text" id="post-title" placeholder="Заголовок (макс. 16 символов)" maxlength="16">
-            <textarea id="post-text" placeholder="Текст (макс. 500 символов)" maxlength="500"></textarea>
-            <div class="image-upload" id="image-upload">
-                <img class="placeholder" src="https://img.icons8.com/ios/50/ffffff/image.png" alt="image-placeholder"/>
-                <p>Перетащите или выберите изображение</p>
-                <input type="file" id="image-input" accept="image/*">
-                <img class="image-preview" id="image-preview" alt="preview"/>
-            </div>
-            <button class="publish-button" id="publish-button">Опубликовать</button>
-        </div>
-    </div>
-    <div class="modal" id="avatar-modal">
-        <div class="modal-content">
-            <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
-            <img id="avatar-modal-image" class="avatar-modal-image" src="" alt="avatar"/>
-            <div class="user-info">
-                <div class="username-container">
-                    <h2 id="avatar-modal-username">Пользователь</h2>
-                </div>
-                <div class="user-bio" id="avatar-modal-bio"></div>
-                <div class="user-stats">
-                    <div class="stat-item">
-                        <div class="stat-number" id="stat-subscriptions">0</div>
-                        <div class="stat-label">Подписки</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="stat-subscribers">0</div>
-                        <div class="stat-label">Подписчики</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="stat-friends">0</div>
-                        <div class="stat-label">Друзья</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal" id="image-modal">
-        <div class="modal-content">
-            <img class="modal-close" src="https://img.icons8.com/ios/50/ffffff/close-window.png" alt="close"/>
-            <img id="post-image-modal" class="post-image-modal" src="" alt="post image"/>
-        </div>
-    </div>
-    <div class="modal" id="cooldown-modal">
-        <div class="modal-content cooldown-modal-content">
-            <p class="cooldown-message" id="cooldown-message">Подождите перед созданием нового поста!</p>
-            <button class="cooldown-close-button" id="cooldown-close-button">Закрыть</button>
-        </div>
-    </div>
-    <script type="module">
-        import { auth, db, onAuthStateChanged, doc, getDoc, collection, addDoc, getDocs, query, orderBy, onSnapshot } from './database.js';
+  </div>
+  <div class="fixworked-input-container">
+    <img src="assets/images/image.svg" alt="Фото" onclick="selectPhoto()" />
+    <input type="text" class="fixworked-input-field" placeholder="Введите сообщение..." maxlength="1000" />
+    <img src="assets/images/send.svg" alt="Отправить" onclick="sendMessage()" />
+  </div>
+  <script>
+    // Функция для экранирования HTML
+    function escapeHTML(str) {
+      try {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      } catch (error) {
+        console.error('Ошибка экранирования:', error);
+        return str.replace(/[&<>"']/g, (m) => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[m]));
+      }
+    }
 
-        const searchInput = document.querySelector('.search-input');
-        const notFoundCard = document.querySelector('.not-found-card');
-        const navItems = document.querySelectorAll('.nav-item');
-        const verifiedIcon = document.querySelector('.verified-icon');
-        const plusIcon = document.querySelector('.plus-icon');
-        const modal = document.querySelector('#post-modal');
-        const modalClose = document.querySelector('#post-modal .modal-close');
-        const imageUpload = document.querySelector('#image-upload');
-        const imageInput = document.querySelector('#image-input');
-        const imagePreview = document.querySelector('#image-preview');
-        const publishButton = document.querySelector('#publish-button');
-        const postTitle = document.querySelector('#post-title');
-        const postText = document.querySelector('#post-text');
-        const content = document.querySelector('#content');
-        const loadingOverlay = document.querySelector('#loading-overlay');
-        const avatarModal = document.querySelector('#avatar-modal');
-        const avatarModalImage = document.querySelector('#avatar-modal-image');
-        const avatarModalUsername = document.querySelector('#avatar-modal-username');
-        const avatarModalBio = document.querySelector('#avatar-modal-bio');
-        const statSubscriptions = document.querySelector('#stat-subscriptions');
-        const statSubscribers = document.querySelector('#stat-subscribers');
-        const statFriends = document.querySelector('#stat-friends');
-        const avatarModalClose = document.querySelector('#avatar-modal .modal-close');
-        const imageModal = document.querySelector('#image-modal');
-        const postImageModal = document.querySelector('#post-image-modal');
-        const imageModalClose = document.querySelector('#image-modal .modal-close');
-        const cooldownModal = document.querySelector('#cooldown-modal');
-        const cooldownMessage = document.querySelector('#cooldown-message');
-        const cooldownCloseButton = document.querySelector('#cooldown-close-button');
+    // Безопасное выполнение функций
+    function safeExecute(fn) {
+      try {
+        return fn();
+      } catch (error) {
+        console.error('Ошибка выполнения:', error);
+        return null;
+      }
+    }
 
-        const IMGUR_CLIENT_ID = '8ea63c636bd153e';
-        let currentUser = null;
-        let unsubscribeSnapshot = null;
-        let lastPostTimestamp = null;
-        const POST_COOLDOWN = 5 * 60 * 1000; // 5 минут в миллисекундах
+    function goBack() {
+      safeExecute(() => {
+        window.history.back();
+      });
+    }
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                loadingOverlay.classList.add('active');
-                try {
-                    // Очистка старого кэша для синхронизации
-                    localStorage.removeItem(`posts_${currentUser.uid}`);
-                    await loadPosts();
-                    listenForNewPosts();
-                    // Загрузка времени последнего поста
-                    lastPostTimestamp = localStorage.getItem(`lastPost_${currentUser.uid}`) || null;
-                } catch (error) {
-                    console.error('Ошибка загрузки постов:', error);
-                    alert('Не удалось загрузить посты. Проверьте настройки Firestore.');
-                } finally {
-                    loadingOverlay.classList.remove('active');
-                }
-            } else {
-                window.location.href = 'auth.html';
-            }
+    function selectPhoto() {
+      safeExecute(() => {
+        alert('Выбор фото пока не реализован');
+      });
+    }
+
+    function hideKeyboard() {
+      safeExecute(() => {
+        document.activeElement.blur();
+      });
+    }
+
+    function sendMessage() {
+      safeExecute(() => {
+        const input = document.querySelector('.fixworked-input-field');
+        let messageText = input.value.trim();
+
+        if (!messageText) return;
+
+        // Санитизируем ввод
+        messageText = escapeHTML(messageText);
+
+        const chatContainer = document.querySelector('.fixworked-chat-container');
+        const newMessage = document.createElement('div');
+        newMessage.classList.add('fixworked-message', 'user');
+        newMessage.innerHTML = `<span class="fixworked-message-content">${messageText}</span><span class="fixworked-message-time">${getCurrentTime()}</span>`;
+        chatContainer.appendChild(newMessage);
+        input.value = '';
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      });
+    }
+
+    function getCurrentTime() {
+      return safeExecute(() => {
+        const now = new Date();
+        return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      }) || '00:00';
+    }
+
+    // Инициализация времени первого сообщения
+    safeExecute(() => {
+      document.getElementById('support-message-time').textContent = getCurrentTime();
+    });
+
+    // Автоматическая прокрутка при открытии клавиатуры
+    window.addEventListener('resize', () => {
+      safeExecute(() => {
+        const chatContainer = document.querySelector('.fixworked-chat-container');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      });
+    });
+
+    // Блокировка скриптов с помощью MutationObserver
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeName === 'SCRIPT') {
+            node.parentNode.removeChild(node);
+            console.warn('Попытка вставки скрипта заблокирована');
+          }
         });
+      });
+    });
 
-        async function loadPosts() {
-            const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-            const querySnapshot = await getDocs(postsQuery);
-            const posts = [];
-            const users = {};
-
-            content.innerHTML = ''; // Очистка контента перед загрузкой
-
-            for (const postDoc of querySnapshot.docs) {
-                const postData = postDoc.data();
-                const postId = postDoc.id;
-                postData.id = postId;
-
-                try {
-                    if (!users[postData.uid]) {
-                        const userRef = doc(db, 'users', postData.uid);
-                        const userDoc = await getDoc(userRef);
-                        users[postData.uid] = userDoc.exists() ? userDoc.data() : { 
-                            username: 'Guest', 
-                            avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', 
-                            verify: false,
-                            bio: '',
-                            subscriptions: 0,
-                            subscribers: 0,
-                            friends: 0
-                        };
-                    }
-                    renderPost(postData, users[postData.uid], postId);
-                    posts.push(postData);
-                } catch (error) {
-                    console.error(`Ошибка загрузки профиля для поста ${postId}:`, error);
-                }
-            }
-
-            localStorage.setItem(`posts_${currentUser.uid}`, JSON.stringify({ posts, users }));
-        }
-
-        function listenForNewPosts() {
-            if (unsubscribeSnapshot) unsubscribeSnapshot();
-
-            const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-            unsubscribeSnapshot = onSnapshot(postsQuery, async (snapshot) => {
-                const cachedData = JSON.parse(localStorage.getItem(`posts_${currentUser.uid}`)) || { posts: [], users: {} };
-                const { posts, users } = cachedData;
-
-                for (const change of snapshot.docChanges()) {
-                    if (change.type === 'added') {
-                        const postData = change.doc.data();
-                        const postId = change.doc.id;
-                        postData.id = postId;
-
-                        const existingPost = posts.find(p => p.id === postId);
-                        if (existingPost) continue;
-
-                        try {
-                            if (!users[postData.uid]) {
-                                const userRef = doc(db, 'users', postData.uid);
-                                const userDoc = await getDoc(userRef);
-                                users[postData.uid] = userDoc.exists() ? userDoc.data() : { 
-                                    username: 'Guest', 
-                                    avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', 
-                                    verify: false,
-                                    bio: '',
-                                    subscriptions: 0,
-                                    subscribers: 0,
-                                    friends: 0
-                                };
-                            }
-                            renderPost(postData, users[postData.uid], postId, true);
-                            posts.unshift(postData);
-                            localStorage.setItem(`posts_${currentUser.uid}`, JSON.stringify({ posts, users }));
-                        } catch (error) {
-                            console.error(`Ошибка загрузки профиля для нового поста ${postId}:`, error);
-                        }
-                    }
-                }
-            }, (error) => {
-                console.error('Ошибка подписки на новые посты:', error);
-            });
-        }
-
-        function updatePostTimes() {
-            const posts = content.querySelectorAll('.post');
-            posts.forEach(post => {
-                const createdAt = post.dataset.createdAt;
-                if (createdAt) {
-                    const timeElement = post.querySelector('.post-time');
-                    const diff = Date.now() - parseInt(createdAt);
-                    const seconds = Math.floor(diff / 1000);
-                    const minutes = Math.floor(seconds / 60);
-                    const hours = Math.floor(minutes / 60);
-                    const days = Math.floor(hours / 24);
-
-                    if (seconds < 60) {
-                        timeElement.textContent = `${seconds} сек назад`;
-                    } else if (minutes < 60) {
-                        timeElement.textContent = `${minutes} мин назад`;
-                    } else if (hours < 24) {
-                        timeElement.textContent = `${hours} ч назад`;
-                    } else {
-                        timeElement.textContent = `${days} дн назад`;
-                    }
-                }
-            });
-        }
-
-        setInterval(updatePostTimes, 1000);
-
-        searchInput.addEventListener('input', () => {
-            const searchTerm = searchInput.value.trim().toLowerCase();
-            const posts = content.querySelectorAll('.post');
-            let hasMatches = false;
-
-            posts.forEach(post => {
-                const title = post.querySelector('.post-title')?.textContent.toLowerCase() || '';
-                const text = post.querySelector('.post-text')?.textContent.toLowerCase() || '';
-                if (title.includes(searchTerm) || text.includes(searchTerm)) {
-                    post.style.display = 'flex';
-                    hasMatches = true;
-                } else {
-                    post.style.display = 'none';
-                }
-            });
-
-            if (searchTerm === '') {
-                posts.forEach(post => post.style.display = 'flex');
-                notFoundCard.classList.remove('active');
-            } else if (!hasMatches) {
-                notFoundCard.classList.add('active');
-            } else {
-                notFoundCard.classList.remove('active');
-            }
-        });
-
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                navItems.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                const navText = item.querySelector('.nav-text').textContent;
-                if (navText === 'Профиль') {
-                    if (unsubscribeSnapshot) unsubscribeSnapshot();
-                    window.location.href = 'profile.html';
-                } else if (navText === 'Лидеры') {
-                    alert('Переход на страницу лидеров (заглушка)!');
-                }
-            });
-        });
-
-        verifiedIcon.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            verifiedIcon.classList.add('show-tooltip');
-            setTimeout(() => {
-                verifiedIcon.classList.remove('show-tooltip');
-            }, 2000);
-        }, { passive: true });
-
-        verifiedIcon.addEventListener('click', () => {
-            verifiedIcon.classList.toggle('show-tooltip');
-        });
-
-        plusIcon.addEventListener('click', () => {
-            if (lastPostTimestamp && (Date.now() - parseInt(lastPostTimestamp)) < POST_COOLDOWN) {
-                const timeLeft = Math.ceil((POST_COOLDOWN - (Date.now() - parseInt(lastPostTimestamp))) / 1000 / 60);
-                cooldownMessage.textContent = `Подождите ${timeLeft} минут перед созданием нового поста!`;
-                cooldownModal.classList.add('active');
-            } else {
-                modal.classList.add('active');
-            }
-        });
-
-        modalClose.addEventListener('click', () => {
-            modal.classList.remove('active');
-            resetModal();
-        });
-
-        avatarModalClose.addEventListener('click', () => {
-            avatarModal.classList.remove('active');
-        });
-
-        imageModalClose.addEventListener('click', () => {
-            imageModal.classList.remove('active');
-        });
-
-        cooldownCloseButton.addEventListener('click', () => {
-            cooldownModal.classList.remove('active');
-        });
-
-        imageUpload.addEventListener('click', () => {
-            imageInput.click();
-        });
-
-        imageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    imagePreview.src = reader.result;
-                    imageUpload.classList.add('has-image');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        imageUpload.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            imageUpload.style.borderColor = '#6464ff';
-        });
-
-        imageUpload.addEventListener('dragleave', () => {
-            imageUpload.style.borderColor = '#303044';
-        });
-
-        imageUpload.addEventListener('drop', (e) => {
-            e.preventDefault();
-            imageUpload.style.borderColor = '#303044';
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    imagePreview.src = reader.result;
-                    imageUpload.classList.add('has-image');
-                };
-                reader.readAsDataURL(file);
-                imageInput.files = e.dataTransfer.files;
-            }
-        });
-
-        async function uploadToImgur(file) {
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('type', 'file');
-
-            try {
-                const response = await fetch('https://api.imgur.com/3/image', {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Client-ID ${IMGUR_CLIENT_ID}`,
-                        Accept: 'application/json'
-                    },
-                    body: formData
-                });
-                const data = await response.json();
-                if (data.success && data.data.link) {
-                    return data.data.link;
-                } else {
-                    throw new Error('Ошибка загрузки изображения в Imgur');
-                }
-            } catch (error) {
-                console.error('Imgur upload error:', error);
-                throw error;
-            }
-        }
-
-        publishButton.addEventListener('click', async () => {
-            const title = postTitle.value.trim();
-            const text = postText.value.trim();
-            const file = imageInput.files[0];
-
-            if (!title && !text && !file) {
-                alert('Добавьте хотя бы заголовок, текст или изображение!');
-                return;
-            }
-
-            loadingOverlay.classList.add('active');
-            let imageUrl = '';
-
-            if (file) {
-                try {
-                    imageUrl = await uploadToImgur(file);
-                } catch (error) {
-                    alert('Ошибка загрузки изображения!');
-                    loadingOverlay.classList.remove('active');
-                    return;
-                }
-            }
-
-            const postData = {
-                uid: currentUser.uid,
-                title,
-                text,
-                imageUrl,
-                createdAt: Date.now(),
-                comments: 0
-            };
-
-            try {
-                const docRef = await addDoc(collection(db, 'posts'), postData);
-                postData.id = docRef.id;
-                modal.classList.remove('active');
-                resetModal();
-
-                const cachedData = JSON.parse(localStorage.getItem(`posts_${currentUser.uid}`)) || { posts: [], users: {} };
-                const userRef = doc(db, 'users', currentUser.uid);
-                const userDoc = await getDoc(userRef);
-                const userData = userDoc.exists() ? userDoc.data() : { 
-                    username: 'Guest', 
-                    avatar: 'https://img.icons8.com/ios/50/ffffff/user.png', 
-                    verify: false,
-                    bio: '',
-                    subscriptions: 0,
-                    subscribers: 0,
-                    friends: 0
-                };
-                cachedData.users[currentUser.uid] = userData;
-                cachedData.posts.unshift(postData);
-                localStorage.setItem(`posts_${currentUser.uid}`, JSON.stringify(cachedData));
-                // Сохраняем время публикации поста
-                lastPostTimestamp = Date.now();
-                localStorage.setItem(`lastPost_${currentUser.uid}`, lastPostTimestamp);
-            } catch (error) {
-                console.error('Ошибка публикации поста:', error);
-                alert('Ошибка публикации поста!');
-            } finally {
-                loadingOverlay.classList.remove('active');
-            }
-        });
-
-        function resetModal() {
-            postTitle.value = '';
-            postText.value = '';
-            imageInput.value = '';
-            imageUpload.classList.remove('has-image');
-            imagePreview.src = '';
-        }
-
-        function renderPost(postData, userData, postId, prepend = false) {
-            const existingPost = document.querySelector(`.post[data-id="${postId}"]`);
-            if (existingPost) return;
-
-            const post = document.createElement('div');
-            post.classList.add('post');
-            post.dataset.createdAt = postData.createdAt;
-            post.dataset.id = postId;
-
-            const postHeader = document.createElement('div');
-            postHeader.classList.add('post-header');
-
-            const postAvatar = document.createElement('img');
-            postAvatar.classList.add('post-avatar');
-            postAvatar.src = userData.avatar || 'https://img.icons8.com/ios/50/ffffff/user.png';
-            postAvatar.alt = 'avatar';
-            postAvatar.addEventListener('click', () => {
-                avatarModalImage.src = postAvatar.src;
-                avatarModalUsername.textContent = userData.username || 'Guest';
-                avatarModalBio.textContent = userData.bio || 'Биография не указана';
-                statSubscriptions.textContent = userData.subscriptions || 0;
-                statSubscribers.textContent = userData.subscribers || 0;
-                statFriends.textContent = userData.friends || 0;
-                avatarModal.classList.add('active');
-            });
-            postHeader.appendChild(postAvatar);
-
-            const headerInfo = document.createElement('div');
-            const postUsernameContainer = document.createElement('div');
-            postUsernameContainer.classList.add('post-username-container');
-            
-            const postUsernameElement = document.createElement('div');
-            postUsernameElement.classList.add('post-username');
-            postUsernameElement.textContent = userData.username || 'Guest';
-            postUsernameContainer.appendChild(postUsernameElement);
-
-            headerInfo.appendChild(postUsernameContainer);
-
-            const postTime = document.createElement('div');
-            postTime.classList.add('post-time');
-            postTime.textContent = '0 сек назад';
-            headerInfo.appendChild(postTime);
-
-            postHeader.appendChild(headerInfo);
-            post.appendChild(postHeader);
-
-            if (postData.imageUrl) {
-                const postImage = document.createElement('img');
-                postImage.classList.add('post-image');
-                postImage.src = postData.imageUrl;
-                postImage.alt = 'post image';
-                postImage.addEventListener('click', () => {
-                    postImageModal.src = postData.imageUrl;
-                    imageModal.classList.add('active');
-                });
-                post.appendChild(postImage);
-            }
-
-            if (postData.title) {
-                const postTitleElement = document.createElement('div');
-                postTitleElement.classList.add('post-title');
-                postTitleElement.textContent = postData.title;
-                post.appendChild(postTitleElement);
-            }
-
-            if (postData.text) {
-                const postTextElement = document.createElement('div');
-                postTextElement.classList.add('post-text');
-                postTextElement.textContent = postData.text;
-                post.appendChild(postTextElement);
-            }
-
-            const postActions = document.createElement('div');
-            postActions.classList.add('post-actions');
-
-            const likeAction = document.createElement('div');
-            likeAction.classList.add('action-item');
-            const likeIcon = document.createElement('img');
-            likeIcon.src = 'https://img.icons8.com/ios/50/ffffff/like--v1.png';
-            likeIcon.alt = 'like';
-            const likeCount = document.createElement('span');
-            likeCount.textContent = '0';
-            likeAction.appendChild(likeIcon);
-            likeAction.appendChild(likeCount);
-            postActions.appendChild(likeAction);
-
-            const dislikeAction = document.createElement('div');
-            dislikeAction.classList.add('action-item');
-            const dislikeIcon = document.createElement('img');
-            dislikeIcon.src = 'https://img.icons8.com/ios/50/ffffff/dislike--v1.png';
-            dislikeIcon.alt = 'dislike';
-            const dislikeCount = document.createElement('span');
-            dislikeCount.textContent = '0';
-            dislikeAction.appendChild(dislikeIcon);
-            dislikeAction.appendChild(dislikeCount);
-            postActions.appendChild(dislikeAction);
-
-            const commentAction = document.createElement('div');
-            commentAction.classList.add('action-item');
-            const commentIcon = document.createElement('img');
-            commentIcon.src = 'https://img.icons8.com/ios/50/ffffff/comments--v1.png';
-            commentIcon.alt = 'comment';
-            const commentCount = document.createElement('span');
-            commentCount.textContent = postData.comments || 0;
-            commentAction.appendChild(commentIcon);
-            commentAction.appendChild(commentCount);
-            postActions.appendChild(commentAction);
-
-            post.appendChild(postActions);
-
-            commentAction.addEventListener('click', () => {
-                alert('Комментарии пока не реализованы!');
-            });
-
-            if (prepend) {
-                content.prepend(post);
-            } else {
-                content.appendChild(post);
-            }
-        }
-
-        window.addEventListener('beforeunload', () => {
-            if (unsubscribeSnapshot) unsubscribeSnapshot();
-        });
-    </script>
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  </script>
 </body>
 </html>
