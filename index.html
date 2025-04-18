@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>FixWorked</title>
+  <title>FixWorked - Чат</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="assets/images/icon.png" type="image/png" />
   <link rel="apple-touch-icon" href="assets/images/icon.png" />
@@ -23,6 +23,7 @@
       background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
       background-attachment: fixed;
       background-size: cover;
+      background-repeat: no-repeat;
       overflow: hidden;
       touch-action: manipulation;
     }
@@ -30,22 +31,22 @@
     body {
       display: flex;
       flex-direction: column;
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      color: #fff;
     }
 
     .fixworked-top-banner {
       position: fixed;
-      top: calc(10px + env(safe-area-inset-top));
+      top: 15px;
       left: 50%;
       transform: translateX(-50%);
       background-color: #ffffff20;
       backdrop-filter: blur(10px);
       color: #fff;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: clamp(12px, 3.5vw, 14px);
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: clamp(14px, 4vw, 16px);
       font-weight: 600;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       z-index: 1100;
       display: flex;
       align-items: center;
@@ -56,23 +57,31 @@
 
     .fixworked-top-banner-back {
       position: absolute;
-      left: 8px;
+      left: 12px; /* Изменено с right на left */
       top: 50%;
       transform: translateY(-50%);
-      width: 18px;
-      height: 18px;
+      width: 30px;
+      height: 30px;
       cursor: pointer;
-      transition: transform 0.3s ease;
+      transition: transform 0.2s ease;
+      filter: brightness(0.8);
     }
 
-    .fixworked-top-banner-back:active {
-      transform: translateY(-50%) scale(1.2) rotate(90deg);
+    .fixworked-top-banner-back:hover {
+      filter: brightness(1);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    @media (max-width: 768px) {
+      .fixworked-top-banner-back:active {
+        transform: translateY(-50%) scale(1.2);
+      }
     }
 
     .fixworked-chat-container {
       flex: 1;
       overflow-y: auto;
-      padding: calc(50px + env(safe-area-inset-top)) 8px calc(60px + env(safe-area-inset-bottom));
+      padding: calc(50px + env(safe-area-inset-top)) 10px calc(70px + env(safe-area-inset-bottom));
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
@@ -83,26 +92,33 @@
     .fixworked-message {
       max-width: 80%;
       color: #fff;
-      padding: 6px 10px;
-      border-radius: 8px;
-      margin-bottom: 6px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      margin-bottom: 4px;
       font-size: clamp(12px, 3.5vw, 13px);
       line-height: 1.4;
       word-break: break-word;
       white-space: normal;
       display: inline-block;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .fixworked-message.support {
-      background: linear-gradient(135deg, #2f2f5e, #4a4a8a);
+      background: linear-gradient(135deg, #2a2a4a, #1f1f3a);
       margin-right: auto;
-      margin-left: 8px;
+      margin-left: 10px;
+      padding: 12px 16px; /* Увеличен padding для большей высоты */
+      min-height: 60px; /* Минимальная высота сообщения */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .fixworked-message.user {
-      background: linear-gradient(135deg, #3b3b6b, #5a5a9a);
+      background: linear-gradient(135deg, #4e54c8, #8f94fb);
       margin-left: auto;
-      margin-right: 8px;
+      margin-right: 10px;
     }
 
     .fixworked-message-content {
@@ -112,48 +128,54 @@
 
     .fixworked-message-time {
       display: block;
-      font-size: clamp(8px, 2.5vw, 9px);
+      font-size: clamp(9px, 2.5vw, 10px);
       color: #a0a0a0;
-      margin-top: 3px;
+      margin-top: 4px;
       text-align: right;
     }
 
     .fixworked-input-container {
       position: fixed;
-      bottom: env(safe-area-inset-bottom);
+      bottom: 0;
       left: 0;
       right: 0;
-      height: 55px;
+      height: 70px;
       background: linear-gradient(135deg, #1f1f3a, #2f2f5e);
-      border-top-left-radius: 14px;
-      border-top-right-radius: 14px;
-      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.4);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.4);
       z-index: 1000;
       display: flex;
       align-items: center;
-      padding: 0 8px;
+      padding: 0 10px;
     }
 
     .fixworked-input-container img {
-      width: clamp(24px, 6vw, 26px);
-      height: clamp(24px, 6vw, 26px);
+      width: clamp(28px, 7vw, 30px); /* Увеличен размер иконок */
+      height: clamp(28px, 7vw, 30px);
       cursor: pointer;
-      transition: transform 0.2s ease;
+      transition: transform 0.2s ease, filter 0.2s ease;
+      filter: brightness(0.8);
+    }
+
+    .fixworked-input-container img:hover {
+      filter: brightness(1);
+      transform: scale(1.1);
     }
 
     .fixworked-input-container img:active {
-      transform: scale(1.2);
+      transform: scale(0.95);
     }
 
     .fixworked-input-field {
       flex: 1;
-      background-color: #ffffff20;
-      border: none;
-      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
       padding: 8px 12px;
-      margin: 0 8px;
+      margin: 0 10px;
       color: #fff;
-      font-size: clamp(11px, 3.5vw, 12px);
+      font-size: clamp(12px, 3.5vw, 13px);
       outline: none;
     }
 
@@ -161,20 +183,25 @@
       color: #a0a0a0;
     }
 
-    /* Адаптивность */
-    @media (max-width: 480px) {
-      .fixworked-chat-container {
-        padding: calc(45px + env(safe-area-inset-top)) 6px calc(55px + env(safe-area-inset-bottom));
+    @media (max-width: 414px) {
+      .fixworked-diffusion {
+        padding: calc(40px + env(safe-area-inset-top)) 8px calc(65px + env(safe-area-inset-bottom));
       }
 
       .fixworked-input-container {
-        height: 50px;
-        padding: 0 6px;
+        height: 65px;
+        padding: 0 8px;
+      }
+
+      .fixworked-top-banner {
+        width: clamp(180px, 80%, 280px);
       }
     }
 
     @media (min-width: 769px) {
-      .fixworked-top-banner, .fixworked-input-container, .fixworked-chat-container {
+      .fixworked-top-banner,
+      .fixworked-input-container,
+      .fixworked-chat-container {
         display: none;
       }
 
@@ -208,23 +235,25 @@
     <img src="assets/images/send.svg" alt="Отправить" onclick="sendMessage()" />
   </div>
   <script>
-    // Функция для экранирования HTML
-    function escapeHTML(str) {
-      try {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-      } catch (error) {
-        console.error('Ошибка экранирования:', error);
-        return str.replace(/[&<>"']/g, (m) => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;'
-        }[m]));
-      }
-    }
+    
+// Функция для экранирования HTML
+function escapeHTML(str) {
+  try {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  } catch (error) {
+    console.error('Ошибка экранирования:', error);
+    return str.replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[m]));
+  }
+}
+
 
     // Безопасное выполнение функций
     function safeExecute(fn) {
@@ -261,7 +290,6 @@
 
         if (!messageText) return;
 
-        // Санитизируем ввод
         messageText = escapeHTML(messageText);
 
         const chatContainer = document.querySelector('.fixworked-chat-container');
